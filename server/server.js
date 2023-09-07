@@ -74,7 +74,7 @@ app.post('/register', async (req, res) => {
         return res.status(400).send('密碼不符合規定');
     }
 
-    
+
     // 對密碼進行bcrypt加密
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -95,7 +95,7 @@ app.post('/login', (req, res) => {
     const { identifier, password } = req.body;
 
     // 從資料庫中查找用戶
-    const query = 'SELECT username, password FROM users WHERE username = ? OR email = ?';
+    const query = 'SELECT username, password, email FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
         if (err) {
             return res.status(500).send(err);
@@ -115,7 +115,16 @@ app.post('/login', (req, res) => {
 
         // 生成 JWT
         const token = jwt.sign({ username: user.username }, secret, { expiresIn: '1h' });
-        res.status(200).json({ message: '登入成功!', token: token });
+
+        // 返回令牌和用戶資訊
+        res.status(200).json({
+            message: '登入成功!',
+            token: token,
+            user: {
+                username: user.username,
+                email: user.email
+            }
+        });
     });
 });
 

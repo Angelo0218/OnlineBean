@@ -1,5 +1,5 @@
 <template>
-    <Nav/>
+
     <main class="flex flex-wrap gap-x-8 gap-y-4 justify-center pt-20">
         <div class="alert flex justify-center">
             <span class="text-3xl">選擇植物</span>
@@ -87,12 +87,10 @@
     </main>
 </template>
 <script>
-import Nav from '../components/nav.vue';
+
 
 export default {
-  components: {
-    Nav
-  },
+
 
 }
 </script>

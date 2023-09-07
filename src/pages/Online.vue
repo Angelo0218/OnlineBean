@@ -1,5 +1,5 @@
 <template>
-    <Nav/>
+
     <div class=" container " style="margin-top:80px;">
         <div class="alert flex justify-center">
             <span class=" text-3xl">養殖植物</span>
@@ -14,12 +14,10 @@
     </div>
 </template>
 <script>
-import Nav from '../components/nav.vue';
+
 
 export default {
-  components: {
-    Nav
-  },
+
 
 }
 </script>
