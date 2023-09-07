@@ -19,7 +19,9 @@ export default {
       spacing: {
         '128': '45vw',
         '111': '20vw',
-        
+        '112': '60rem',
+        'a1': '30rem',
+        'a2': '20rem',
       }
     },
   },

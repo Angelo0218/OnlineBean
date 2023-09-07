@@ -13,6 +13,9 @@ const app = express();
 const port = 3000;
 const secret = process.env.JWT_SECRET;  // JWT 密鑰
 const dbPassword = process.env.DB_PASSWORD;  // 資料庫密碼
+const DB_USER = process.env.DB_USER;
+const DB_IP = process.env.DB_IP;
+const DB_DATABASE = process.env.DB_DATABASE;
 
 // 中介軟體，用於解析 JSON 請求
 app.use(express.json());
@@ -22,10 +25,10 @@ app.use(cors());
 
 // 資料庫配置和連接
 const db = mysql.createConnection({
-    host: '192.168.0.41',
-    user: 'Angelo02182',
+    host: DB_IP,
+    user: DB_USER,
     password: dbPassword,
-    database: 'plant_care'
+    database: DB_DATABASE
 });
 
 // 初始化資料庫連接
@@ -39,10 +42,13 @@ db.connect(err => {
 
 // JWT 驗證中介層：確保請求帶有有效的 JWT
 function authenticateJWT(req, res, next) {
-    const token = req.header('Authorization');
+    const authHeader = req.header('Authorization');
+    const token = authHeader && authHeader.split(' ')[1];
+
     if (!token) {
         return res.status(401).send('Access Denied');
     }
+
     jwt.verify(token, secret, (err, user) => {
         if (err) {
             return res.status(403).send('Invalid token');
@@ -51,6 +57,7 @@ function authenticateJWT(req, res, next) {
         next();
     });
 }
+
 
 // 受保護的路由：只有帶有有效 JWT 的用戶可以訪問
 app.get('/dashboard', authenticateJWT, (req, res) => {
@@ -111,8 +118,6 @@ app.post('/login', (req, res) => {
         res.status(200).json({ message: '登入成功!', token: token });
     });
 });
-
-
 
 
 

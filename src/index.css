@@ -4,20 +4,4 @@
          
 }
 
-/* body {
-  background-image: linear-gradient(to right, #ed6ea0 0%, #ec8c69 100%);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center;
-  background-size: cover;
-  margin: 0;
-  padding: 0;
 
-} */
-
-html,
-body {
-  width: 100%;
-  hidden: 100%;
-  overflow: hidden;
-}
