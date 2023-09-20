@@ -69,7 +69,7 @@ app.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
 
     // 確保密碼符合規定：至少8個字符，包含大小寫字母
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    const passwordRegex = /^(?=.*[a-z]).{6,}$/;
     if (!passwordRegex.test(password)) {
         return res.status(400).send('密碼不符合規定');
     }
