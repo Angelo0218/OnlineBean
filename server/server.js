@@ -146,7 +146,15 @@ app.post('/login', (req, res) => {
     });
 });
 
-
+app.get('/api/plants', authenticateJWT, (_, res) => {
+    const query = 'SELECT * FROM plants';
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).send('資料庫查詢錯誤');
+        }
+        res.status(200).json(results);
+    });
+});
 
 
 // 啟動伺服器

@@ -10,33 +10,38 @@
       </div>
     </div>
     <transition name="fade">
-      <div  v-if="showWelcomeMessage && isAuthenticated"
-           class="bg-green-200 text-amber-800 mt-129   font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
+      <div v-if="showWelcome && isAuthenticated"
+        class="bg-green-200 text-amber-800 mt-129 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
         登入成功歡迎！
       </div>
     </transition>
+
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../store/auth.js';
 
 export default {
   setup() {
     const authStore = useAuthStore();
-    const showWelcomeMessage = ref(true);
+    const showWelcome = ref(authStore.showWelcomeMessage);
 
     onMounted(() => {
-      if (authStore.isAuthenticated) {
+      if (showWelcome.value) {
         setTimeout(() => {
-          showWelcomeMessage.value = false;
-        }, 3000);  // 3 seconds
+          showWelcome.value = false;
+        }, 3000);  // 歡迎消息將在3秒後消失
       }
     });
+    onUnmounted(() => {
+      authStore.hideWelcomeMessage();
+    });
 
-    return { 
-      isAuthenticated: authStore.isAuthenticated, 
-      showWelcomeMessage 
+
+    return {
+      isAuthenticated: authStore.isAuthenticated,
+      showWelcome
     };
   }
 }
@@ -63,13 +68,17 @@ export default {
 
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
-  opacity: 0;
-}
 
-</style>
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active in <2.1.8 */
+  {
+  opacity: 0;
+}</style>
 
 

@@ -91,9 +91,14 @@ export default {
                     authStore.setRegistrationSuccess(true);
                     router.push('/login');
                 }
-            } catch (error) {
-                errorMessage.value = 'Error during registration: ' + error.message;
-            }
+            }catch (error) {
+        errorMessage.value = error.response.data; // 使用伺服器返回的錯誤消息更新 errorMessage
+
+        // 5秒後隱藏錯誤消息
+        setTimeout(() => {
+            errorMessage.value = '';
+        }, 2000); // 5000毫秒 = 5秒
+    }
 
         }
 

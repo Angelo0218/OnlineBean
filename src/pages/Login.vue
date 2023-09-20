@@ -14,7 +14,7 @@
                         <p class="text-4xl font-black leading-tight tracking-tight text-gray-900">
                             登入
                         </p>
-
+                        <form @submit.prevent="handleLogin">
                         <!-- 帳號 (使用者名稱或電子郵件) -->
                         <div>
                             <label for="identifier" class="block mb-2 text-sm font-medium text-gray-900">
@@ -37,7 +37,7 @@
 
 
                         <!-- 記住我選項 -->
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between pt-5 pb-5">
                             <div class="flex items-start">
                                 <div class="flex items-center h-5">
                                     <input id="remember" aria-describedby="remember" type="checkbox"
@@ -52,7 +52,7 @@
                         <!-- 登入按鈕 -->
                         <button @click="handleLogin"
                             class="btn w-full focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">登入</button>
-                    
+                    </form>
                         </div>
                        
                 </div>
@@ -88,6 +88,10 @@ export default {
                 await authStore.login(identifier, password); // Here, you might want to check the result, if the login method in the store returns anything
             } catch (error) {
                 errorMessage.value = '登錄過程中出現錯誤: ' + error.message;
+                  // 5秒後隱藏錯誤消息
+        setTimeout(() => {
+            errorMessage.value = '';
+        }, 2000); // 5000毫秒 = 5秒
             }
         };
 

@@ -9,9 +9,18 @@ export const useAuthStore = defineStore({
     token: null,
     isAuthenticated: false,
     username: null,
+    welcomeMessageShown: false,
     errorMessage: null, // 新增此行
+    showWelcomeMessage: false,
   }),
   actions: {
+    showWelcomeMessage() {
+      if (!this.welcomeMessageShown) {
+        this.welcomeMessageShown = true;
+        return true;
+      }
+      return false;
+    },
     setRegistrationSuccess(value) {
       this.registrationSuccess = value;
     },
@@ -23,14 +32,19 @@ export const useAuthStore = defineStore({
           this.token = response.data.token;
           this.isAuthenticated = true;
           this.username = response.data.user.username;
-
+          this.showWelcomeMessage = true; // Set this to true upon successful login
           router.push('/');
         } else {
-          this.errorMessage = '登入失敗: ' + response.data; // 設置錯誤消息
+          throw new Error(response.data || '登錄失敗');
         }
+    
       } catch (error) {
-        this.errorMessage = '登入過程中出現錯誤: ' + error.message; // 設置錯誤消息
+        throw new Error(error.response.data || error.message);
       }
+    },
+
+    hideWelcomeMessage() {
+      this.showWelcomeMessage = false;
     },
     logout() {
       this.token = null;
