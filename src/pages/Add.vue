@@ -44,7 +44,7 @@ export default {
       try {
         const token = localStorage.getItem('token');
         // 發送帶有 JWT 令牌的請求
-        await axios.post('http://angelo0218-server.ddns.net/api/addPlant', {
+        await axios.post('http://angelo0218-server.ddns.net:3000/addPlant', {
           plantID: this.plantID,
           plantName: this.plantName,
           plantDescription: this.plantDescription,
