@@ -8,8 +8,7 @@ import rateLimit from 'express-rate-limit';
 
 // 讀取 .env 配置文件中的環境變量
 dotenv.config();
-// 允許跨域請求
-app.use(cors());
+
 const app = express();
 const port = 3000;
 const secret = process.env.JWT_SECRET;  // JWT 密鑰
@@ -17,7 +16,8 @@ const dbPassword = process.env.DB_PASSWORD;  // 資料庫密碼
 const DB_USER = process.env.DB_USER;
 const DB_IP = process.env.DB_IP;
 const DB_DATABASE = process.env.DB_DATABASE;
-
+// 允許跨域請求
+app.use(cors());
 // 中介軟體，用於解析 JSON 請求
 app.use(express.json());
 const limiter = rateLimit({
