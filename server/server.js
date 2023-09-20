@@ -73,6 +73,29 @@ app.get('/dashboard', authenticateJWT, (req, res) => {
     res.send('Welcome to the dashboard!');
 });
 
+function authenticateSpecificUser(req, res, next) {
+    const user = req.user;
+
+    // 檢查是否是指定的用戶
+    if (user.username !== 'Angelo0218') {
+        return res.status(403).send('Access Denied: Not Authorized');
+    }
+    next();
+}
+
+app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
+    const { plantID, plantName, plantDescription, image } = req.body;
+
+    const query = 'INSERT INTO yourTableName (plantID, plantName, plantDescription, image) VALUES (?, ?, ?, ?)';
+    
+    db.query(query, [plantID, plantName, plantDescription, image], (err, result) => {
+        if (err) {
+            return res.status(500).send('資料庫寫入錯誤');
+        }
+        res.status(200).send('資料已成功新增！');
+    });
+});
+
 // 註冊新用戶
 app.post('/register', async (req, res) => {
     const { username, password, email } = req.body;

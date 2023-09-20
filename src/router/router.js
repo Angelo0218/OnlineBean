@@ -7,7 +7,7 @@ const routes = [
     { name: '關於我們', path: '/about', component: () => import('../pages/About.vue')},
     { name: '線上養殖', path: '/online', component: () => import('../pages/Online.vue'), meta: { requiresAuth: true }},
     { name: '選擇植物', path: '/Plants', component: () => import('../pages/Plants.vue'), meta: { requiresAuth: true }}, 
-
+    { name: '增加', path: '/Add', component: () => import('../pages/Add.vue')},
   ]
 // 创建路由实例
 const router = createRouter({
@@ -28,6 +28,9 @@ router.beforeEach((to, from, next) => {
         path: '/login',
         query: { redirect: to.fullPath } // 儲存訪問的頁面路徑，登錄後可以選擇跳轉回該頁面
       });
+    } else if (to.path === '/Add' && authStore.username !== 'Angelo0218') {
+      // 如果用戶試圖訪問 "/Add" 但用戶名不是 "Angelo0218"
+      next('/'); // 重定向到首頁或任何其他你選擇的頁面
     } else {
       next(); // 繼續導航
     }
@@ -35,4 +38,5 @@ router.beforeEach((to, from, next) => {
     next(); // 確保一定要調用 next()
   }
 });
+
 export default router

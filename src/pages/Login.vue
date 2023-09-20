@@ -99,7 +99,7 @@ export default {
             if (authStore.registrationSuccess) {
                 setTimeout(() => {
                     authStore.setRegistrationSuccess(false);
-                }, 3000);
+                }, 1000);
             }
         });
 

@@ -27,9 +27,13 @@ export const useAuthStore = defineStore({
     async login(identifier, password) {
       try {
         const response = await axios.post('http://angelo0218-server.ddns.net:3000/login', { identifier, password });
-
+    
         if (response.status === 200) {
           this.token = response.data.token;
+          
+          // 將 token 存儲到 localStorage
+          localStorage.setItem('token', this.token);
+          
           this.isAuthenticated = true;
           this.username = response.data.user.username;
           this.showWelcomeMessage = true; // Set this to true upon successful login
@@ -42,6 +46,7 @@ export const useAuthStore = defineStore({
         throw new Error(error.response.data || error.message);
       }
     },
+    
 
     hideWelcomeMessage() {
       this.showWelcomeMessage = false;
@@ -49,6 +54,7 @@ export const useAuthStore = defineStore({
     logout() {
       this.token = null;
       this.isAuthenticated = false;
+      localStorage.removeItem('token');
     }
   }
 });
