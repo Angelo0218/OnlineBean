@@ -17,7 +17,7 @@ export const useAuthStore = defineStore({
     },
     async login(identifier, password) {
       try {
-        const response = await axios.post('http://192.168.0.41:3000/login', { identifier, password });
+        const response = await axios.post('http://angelo0218-server.ddns.net:3000/login', { identifier, password });
 
         if (response.status === 200) {
           this.token = response.data.token;

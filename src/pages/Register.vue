@@ -80,7 +80,7 @@ export default {
                 }
 
                 // 發送註冊請求
-                const response = await axios.post('http://192.168.0.41:3000/register', {
+                const response = await axios.post('http://angelo0218-server.ddns.net:3000/register', {
                     username: usernameValue,
                     email: emailValue,
                     password: passwordValue,
