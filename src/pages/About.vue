@@ -29,19 +29,19 @@ export default {
     max-width: 800px;
     margin: 40px auto;
     padding: 30px;
-    background-color: #282c34;
+
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+ 
 }
 
 .title {
     font-size: 2.5rem;
-    color: #4a90e2;
+    color: #dce9f8;
     margin-bottom: 25px;
   
 }
 .title2 {
-    background-color:#4a90e2;
+    background-color:#dce9f8;
     margin-top: -10px;
     margin-bottom: 20px;
 

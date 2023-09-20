@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
+import rateLimit from 'express-rate-limit';
 
 // 讀取 .env 配置文件中的環境變量
 dotenv.config();
@@ -19,7 +19,16 @@ const DB_DATABASE = process.env.DB_DATABASE;
 
 // 中介軟體，用於解析 JSON 請求
 app.use(express.json());
-
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15 分鐘的時間窗口
+    max: 100,  // 在時間窗口內最多可以發出的請求數
+    message: "太多請求了，請稍後再試。"
+  });
+  
+  // 使用速率限制中間件
+  app.use('/login', limiter);
+  app.use('/register', limiter);
+  
 // 允許跨域請求
 app.use(cors());
 
@@ -68,24 +77,34 @@ app.get('/dashboard', authenticateJWT, (req, res) => {
 app.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
 
-    // 確保密碼符合規定：至少8個字符，包含大小寫字母
+    // 確保密碼符合規定：至少6個字符
     const passwordRegex = /^(?=.*[a-z]).{6,}$/;
     if (!passwordRegex.test(password)) {
         return res.status(400).send('密碼不符合規定');
     }
 
-
-    // 對密碼進行bcrypt加密
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 將新用戶資料儲存到資料庫
-    const currentDate = new Date().toISOString().slice(0, 10);  // 取得當前日期並格式化為 YYYY-MM-DD
-    const query = 'INSERT INTO users (username, password, email, creationDate) VALUES (?, ?, ?, ?)';
-    db.query(query, [username, hashedPassword, email, currentDate], (err, result) => {
+    // 檢查用戶名或電子郵件是否已存在
+    const checkQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
+    db.query(checkQuery, [username, email], async (err, results) => {
         if (err) {
-            return res.status(500).send(err);
+            return res.status(500).send('資料庫查詢錯誤');
         }
-        res.status(200).send('Registered successfully!');
+        if (results.length > 0) {
+            return res.status(400).send('用戶名或電子郵件已存在');
+        }
+
+        // 對密碼進行bcrypt加密
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 將新用戶資料儲存到資料庫
+        const currentDate = new Date().toISOString().slice(0, 10);  // 取得當前日期並格式化為 YYYY-MM-DD
+        const query = 'INSERT INTO users (username, password, email, creationDate) VALUES (?, ?, ?, ?)';
+        db.query(query, [username, hashedPassword, email, currentDate], (err, result) => {
+            if (err) {
+                return res.status(500).send('資料庫寫入錯誤');
+            }
+            res.status(200).send('註冊成功！');
+        });
     });
 });
 
@@ -98,19 +117,18 @@ app.post('/login', (req, res) => {
     const query = 'SELECT username, password, email FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
         if (err) {
-            return res.status(500).send(err);
+            return res.status(500).send('資料庫查詢錯誤');
         }
 
         if (results.length === 0) {
-            return res.status(401).send('無效的用戶名或密碼');
+            return res.status(401).send('用戶名不存在');
         }
 
         const user = results[0];
-
         const passwordIsValid = await bcrypt.compare(password, user.password);
 
         if (!passwordIsValid) {
-            return res.status(401).send('無效的用戶名或密碼');
+            return res.status(401).send('密碼錯誤');
         }
 
         // 生成 JWT
@@ -118,7 +136,7 @@ app.post('/login', (req, res) => {
 
         // 返回令牌和用戶資訊
         res.status(200).json({
-            message: '登入成功!',
+            message: '登入成功！',
             token: token,
             user: {
                 username: user.username,

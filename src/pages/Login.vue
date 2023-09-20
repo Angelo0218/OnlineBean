@@ -1,10 +1,17 @@
 <template>
     <div class="flex items-center justify-center home  mt-32 sm:mt-20  ">
+        <div  v-if="showRegistrationSuccess"  class="alert alert-success fixed-bottom-alert">
+            註冊成功！請登入。
+        </div>
+        <div v-if="errorMessage" class="alert alert-danger fixed-bottom-alert">
+    {{ errorMessage }}
+</div>
+
         <div class="container w-auto shadow-2xl flex flex-col rounded-l-md max-sm:rounded-none sm:flex-row">
             <div class="left bg-white flex items-center justify-center w-auto rounded max-sm:rounded-none">
                 <div class="w-full md:mt-0 sm:max-w-md xl:p-0">
                     <div class="p-6 space-y-4 md:space-y-6">
-                        <p class="text-3xl font-black leading-tight tracking-tight text-gray-900">
+                        <p class="text-4xl font-black leading-tight tracking-tight text-gray-900">
                             登入
                         </p>
 
@@ -45,46 +52,60 @@
                         <!-- 登入按鈕 -->
                         <button @click="handleLogin"
                             class="btn w-full focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">登入</button>
-                    </div>
+                    
+                        </div>
+                       
                 </div>
             </div>
         </div>
+       
+
     </div>
 </template>
 
 <script>
-import '../index.css';
 
-import { ref } from 'vue'; // 加入 ref 來創建反應性對象
+
+import { ref, onMounted } from 'vue';
+
 import { useAuthStore } from '../store/auth.js'; // 引入我們的 auth store
 
 
-
 export default {
-
     name: 'Login',
     setup() {
-  const authStore = useAuthStore();
-  const credentials = ref({
-      identifier: '',
-      password: ''
-  });
+        const authStore = useAuthStore();
+        const errorMessage = ref('');
 
-  const handleLogin = async () => {
-    try {
-      const { identifier, password } = credentials.value; // 获取 identifier 和 password
-      authStore.login(identifier, password); // Just call the store's login function
-    } catch (error) {
-      console.error('Error during login:', error);
+        const credentials = ref({
+            identifier: '',
+            password: ''
+        });
+
+        const handleLogin = async () => {
+            try {
+                const { identifier, password } = credentials.value;
+                await authStore.login(identifier, password); // Here, you might want to check the result, if the login method in the store returns anything
+            } catch (error) {
+                errorMessage.value = '登錄過程中出現錯誤: ' + error.message;
+            }
+        };
+
+        onMounted(() => {
+            if (authStore.registrationSuccess) {
+                setTimeout(() => {
+                    authStore.setRegistrationSuccess(false);
+                }, 3000);
+            }
+        });
+
+        return {
+            credentials,
+            handleLogin,
+            showRegistrationSuccess: authStore.registrationSuccess,
+            errorMessage  // Include this in the return object
+        };
     }
-  };
-
-  return {
-      credentials,
-      handleLogin
-  };
-}
-
 }
 </script>
 
@@ -98,7 +119,19 @@ video {
 }
 
 
-
+.fixed-bottom-alert {
+    position: fixed;
+    bottom: 30px;  /* 距離網頁底部的距離 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;  /* 確保它在其他元素的上方 */
+    padding: 10px 20px;
+    background-color: rgb(187 247 208 );
+    color: #000000;  /* 只是一個建議的文字顏色 */
+    border: 1px solid rgb(187 247 208 );
+    border-radius: 4px;
+width:50vw;
+}
 p,
 input,
 label {

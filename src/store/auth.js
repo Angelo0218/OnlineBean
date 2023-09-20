@@ -5,33 +5,31 @@ import router from '../router/router.js';
 export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
+    registrationSuccess: false,
     token: null,
     isAuthenticated: false,
-    username: null, // 添加此行
+    username: null,
+    errorMessage: null, // 新增此行
   }),
   actions: {
+    setRegistrationSuccess(value) {
+      this.registrationSuccess = value;
+    },
     async login(identifier, password) {
       try {
-        // console.log('Attempting to log in with credentials:', { identifier, password });
-
         const response = await axios.post('http://192.168.0.41:3000/login', { identifier, password });
-        console.log('Login response:', response.data);
 
         if (response.status === 200) {
           this.token = response.data.token;
           this.isAuthenticated = true;
           this.username = response.data.user.username;
-          console.log('Setting username:', response.data.user.username);
-
 
           router.push('/');
-          console.log('Login successful');
         } else {
-          console.error('Login failed:', response.data);
+          this.errorMessage = '登入失敗: ' + response.data; // 設置錯誤消息
         }
-
       } catch (error) {
-        console.error('Error during login:', error);
+        this.errorMessage = '登入過程中出現錯誤: ' + error.message; // 設置錯誤消息
       }
     },
     logout() {

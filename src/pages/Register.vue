@@ -1,11 +1,15 @@
 <template>
     <form @submit.prevent="register">
         <div class="flex items-center justify-center home  mt-32 sm:mt-20    ">
+            <div v-if="errorMessage" class="alert alert-danger fixed-bottom-alert">
+                {{ errorMessage }}
+            </div>
+
             <div class="container w-auto shadow-2xl flex flex-col rounded-l-md max-sm:rounded-none sm:flex-row">
                 <div class="left bg-white flex items-center justify-center w-auto rounded max-sm:rounded-none">
                     <div class="w-full md:mt-0 sm:max-w-md xl:p-0">
                         <div class="p-6 space-y-4 md:space-y-6">
-                            <p class="text-3xl font-black leading-tight tracking-tight text-gray-900">
+                            <p class="text-4xl font-black leading-tight tracking-tight text-gray-900">
                                 註冊
                             </p>
 
@@ -14,8 +18,7 @@
                                 <label for="username" class="block mb-2 text-sm font-medium text-gray-900">
                                     使用者名稱
                                 </label>
-                                <input type="text" name="username" id="username"
-                                    v-model="username"
+                                <input type="text" name="username" @input="errorMessage = ''" id="username" v-model="username"
                                     class="bg-gray-50 border text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
 
@@ -24,22 +27,21 @@
                                 <label for="email" class="block mb-2 text-sm font-medium text-gray-900">
                                     電子郵件
                                 </label>
-                                <input type="email" name="email" id="email"
-                                    v-model="email"
+                                <input type="email" name="email" id="email" v-model="email" @input="errorMessage = ''"
                                     class="bg-gray-50 border text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
 
                             <!-- 密碼 -->
                             <div>
                                 <label for="password" class="block mb-2 text-sm font-medium text-gray-900">密碼
-                                    (至少8個字符，且包含大小寫英文)</label>
-                                <input type="password" name="password" id="password" placeholder="••••••••"
+                                    (至少6個字符)</label>
+                                <input type="password" name="password" id="password" placeholder="••••••••" @input="errorMessage = ''"
                                     v-model="password"
                                     class="border text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
 
-                            <input type="submit"
-                                class="btn w-full focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            <input type="submit" @input="errorMessage = ''"
+                                class="btn w-full  focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                 value="註冊">
                         </div>
                     </div>
@@ -52,8 +54,8 @@
 <script>
 import { ref } from 'vue';
 import axios from 'axios';
-import '../index.css';
 import { useRouter } from 'vue-router'; // 导入 useRouter
+import { useAuthStore } from '../store/auth.js';
 
 export default {
     name: 'Register',
@@ -62,6 +64,7 @@ export default {
         const username = ref('');
         const email = ref('');
         const password = ref('');
+        const errorMessage = ref('');
 
         async function register() {
             try {
@@ -84,23 +87,24 @@ export default {
                 });
 
                 if (response.status === 200) {
-                    // 註冊成功，執行相應操作，例如導航到登錄頁面
-                    // 使用 router.push 进行导航
+                    const authStore = useAuthStore();
+                    authStore.setRegistrationSuccess(true);
                     router.push('/login');
-                } else {
-                    // 註冊失敗，顯示錯誤消息或執行其他操作
-                    console.error('註冊失敗:', response.data);
                 }
             } catch (error) {
-                console.error('Error during registration:', error);
+                errorMessage.value = 'Error during registration: ' + error.message;
             }
+
         }
+
+
 
         return {
             username,
             email,
             password,
             register,
+            errorMessage
         };
     },
 };
@@ -108,6 +112,19 @@ export default {
 
 
 <style scoped>
+.fixed-bottom-alert {
+    position: fixed;
+    bottom: 30px;  /* 距離網頁底部的距離 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;  /* 確保它在其他元素的上方 */
+    padding: 10px 20px;
+    background-color: rgb(187 247 208 );
+    color: #000000;  /* 只是一個建議的文字顏色 */
+    border: 1px solid rgb(187 247 208 );
+    border-radius: 4px;
+width:50vw;
+}
 video {
     object-fit: cover;
 }
