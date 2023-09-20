@@ -91,7 +91,7 @@ app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
     
     db.query(query, [plantID, plantName, plantDescription, image], (err, result) => {
         if (err) {
-            return res.status(500).send('資料庫寫入錯誤');
+            return res.status(500).send('資料庫寫入錯誤: ' + err.message);
         }
         res.status(200).send('資料已成功新增！');
     });
