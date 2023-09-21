@@ -84,12 +84,12 @@ function authenticateSpecificUser(req, res, next) {
 }
 
 app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
-    const { plantID, plantName, plantDescription, image } = req.body;
+    const {  plantName, plantDescription, image } = req.body;
 
-    const query = 'INSERT INTO plants (plantID, plantName, plantDescription, image) VALUES (?, ?, ?, ?)';
+    const query = 'INSERT INTO plants ( plantName, plantDescription, image) VALUES (?, ?, ?, ?)';
 
     
-    db.query(query, [plantID, plantName, plantDescription, image], (err, result) => {
+    db.query(query, [ plantName, plantDescription, image], (err, result) => {
         if (err) {
             return res.status(500).send('資料庫寫入錯誤: ' + err.message);
         }
@@ -180,6 +180,26 @@ app.get('/api/plants', authenticateJWT, (_, res) => {
     });
 });
 
+// 獲取當前認證用戶的信息
+app.get('/api/currentUser', authenticateJWT, (req, res) => {
+    const username = req.user.username;  // 從 JWT 中獲取用戶名
+
+    // 從資料庫中查找用戶信息
+    const query = 'SELECT username, email FROM users WHERE username = ?';
+    db.query(query, [username], (err, results) => {
+        if (err) {
+            return res.status(500).send('資料庫查詢錯誤');
+        }
+        if (results.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+        const user = results[0];
+        res.status(200).json({
+            username: user.username,
+            email: user.email
+        });
+    });
+});
 
 // 啟動伺服器
 app.listen(port, () => {

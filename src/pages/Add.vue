@@ -3,10 +3,7 @@
     <h1>新增植物</h1>
 
     <form @submit.prevent="submitForm">
-      <div>
-        <label for="plantID">植物 ID:</label>
-        <input type="text" id="plantID" v-model="plantID">
-      </div>
+   
 
       <div>
         <label for="plantName">植物名稱:</label>
@@ -33,7 +30,6 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      plantID: '',
       plantName: '',
       plantDescription: '',
       image: ''
@@ -54,6 +50,8 @@ export default {
             'Authorization': 'Bearer ' + token  // 將令牌添加到請求標頭中
           }
         });
+       
+
         alert('植物已成功新增！');
         this.resetForm();
       } catch (error) {
@@ -61,7 +59,6 @@ export default {
       }
     },
     resetForm() {
-      this.plantID = '';
       this.plantName = '';
       this.plantDescription = '';
       this.image = '';

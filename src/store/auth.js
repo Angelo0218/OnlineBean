@@ -6,8 +6,8 @@ export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
     registrationSuccess: false,
-    token: null,
-    isAuthenticated: false,
+    token: localStorage.getItem('token') || null,
+    isAuthenticated: !!localStorage.getItem('token'),
     username: null,
     welcomeMessageShown: false,
     errorMessage: null, // 新增此行

@@ -24,5 +24,16 @@ axios.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+if (localStorage.getItem('token')) {
+  axios.get('http://angelo0218-server.ddns.net:3000/api/currentUser')
+    .then(response => {
+      const authStore = useAuthStore();
+      authStore.username = response.data.username;
+      authStore.isAuthenticated = true;
+    })
+    .catch(error => {
+      console.error("Error fetching user info:", error);
+    });
+}
 
 app.use(router).mount('#app');
