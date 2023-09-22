@@ -138,7 +138,7 @@ app.post('/login', (req, res) => {
     const { identifier, password } = req.body;
 
     // 從資料庫中查找用戶
-    const query = 'SELECT username, password, email FROM users WHERE username = ? OR email = ?';
+    const query = 'SELECT username, password, email, userLevel  FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
         if (err) {
             return res.status(500).send('資料庫查詢錯誤');
@@ -164,7 +164,8 @@ app.post('/login', (req, res) => {
             token: token,
             user: {
                 username: user.username,
-                email: user.email
+                email: user.email,
+                userLevel: user.userLevel
             }
         });
     });

@@ -31,7 +31,7 @@
                     <router-link to="/login" class="btn btn-ghost ml-2">登入</router-link>
                 </div>
                 <div class="btn-group  " v-else>
-                    <span class="btn btn-ghost">{{ username }}</span>
+                    <router-link to="/user" class="btn btn-ghost">{{ username }}</router-link>
                     <button class="btn btn-primary ml-2" @click="handleLogout">登出</button>
                 </div>
             </div>
