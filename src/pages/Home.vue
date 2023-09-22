@@ -50,7 +50,7 @@ export default {
 <style>
 
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 644px) {
 
 
   h1 {

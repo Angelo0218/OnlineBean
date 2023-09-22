@@ -2,11 +2,11 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import './style.css';
 import router from './router/router.js';
-import { createPinia } from 'pinia'; // 引入 createPinia
+import { createPinia } from 'pinia';
 import '@fortawesome/fontawesome-free/css/all.css';
 import '@fortawesome/fontawesome-free/js/all.js';
-import axios from 'axios'; // 引入 Axios
-import { useAuthStore } from './store/auth'; // 引入 Auth Store
+import axios from 'axios';
+import { useAuthStore } from './store/auth.js';
 
 const app = createApp(App);
 
@@ -24,27 +24,20 @@ axios.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
+// 如果 localStorage 中有 token，则尝试获取当前用户信息
+const authStore = useAuthStore();
 if (localStorage.getItem('token')) {
-  axios.get('http://angelo0218-server.ddns.net:3000/api/currentUser')
-    .then(response => {
-      const authStore = useAuthStore();
-      authStore.username = response.data.username;
-      authStore.isAuthenticated = true;
-    })
-    .catch(error => {
-      console.error("Error fetching user info:", error);
-      if (error.response && error.response.status === 403) {
-        // 如果錯誤狀態碼為 403，清除本地 token 並更新用戶認證狀態
-        localStorage.removeItem('token');
-        const authStore = useAuthStore();
-        authStore.isAuthenticated = false;
-        authStore.token = null;
-        location.reload();
-        // 如果需要，您還可以重定向用戶到登錄頁面
-        // router.push('/login');
-      }
-  
-    });
+  authStore.fetchCurrentUser().catch(error => {
+    console.error("Error fetching user info:", error);
+    if (error.response && error.response.status === 403) {
+      // 如果错误状态码为 403，清除本地 token 并更新用户认证状态
+      localStorage.removeItem('token');
+      authStore.isAuthenticated = false;
+      authStore.token = null;
+      location.reload();
+    }
+  });
 }
 
 app.use(router).mount('#app');

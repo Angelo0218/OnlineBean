@@ -8,23 +8,21 @@
             <span class="loading loading-spinner text-success"></span>
         </div>
         <!-- Display content when loading is finished -->
-        <div v-else>
-            <div v-for="plant in plants" :key="plant.plantID" class="card card-compact w-96 bg-base-100 shadow-xl">
-                <figure>
-                    <img :src="plant.image" :alt="plant.plantName" />
-                </figure>
-                <div class="card-body">
-                    <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
-                    <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
-                    <div class="card-actions justify-center">
-                        <router-link class="btn btn-primary" to="/online">選這個</router-link>
-                    </div>
+        <div v-else v-for="plant in plants" :key="plant.plantID" class="card card-compact w-96 bg-base-100 shadow-xl">
+            <figure>
+                <img :src="plant.image" :alt="plant.plantName" />
+            </figure>
+            <div class="card-body">
+                <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
+                <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
+                <div class="card-actions justify-center">
+                    <router-link class="btn btn-primary" to="/online">選這個</router-link>
                 </div>
             </div>
         </div>
     </main>
 </template>
-  
+
 <script>
 import axios from 'axios';
 
@@ -52,7 +50,7 @@ export default {
     }
 }
 </script>
-  
+
 <style scoped>
 img {
     width: 100px;

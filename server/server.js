@@ -186,7 +186,7 @@ app.get('/api/currentUser', authenticateJWT, (req, res) => {
     const username = req.user.username;  // 從 JWT 中獲取用戶名
 
     // 從資料庫中查找用戶信息
-    const query = 'SELECT username, email FROM users WHERE username = ?';
+    const query = 'SELECT username, email, userLevel FROM users WHERE username = ?';
     db.query(query, [username], (err, results) => {
         if (err) {
             return res.status(500).send('資料庫查詢錯誤');

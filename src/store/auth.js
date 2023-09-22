@@ -17,6 +17,24 @@ export const useAuthStore = defineStore({
     showWelcomeMessage: false,
   }),
   actions: {
+    async fetchCurrentUser() {
+      if (this.token) {
+        try {
+          const response = await axios.get('http://angelo0218-server.ddns.net:3000/api/currentUser', {
+            headers: {
+              'Authorization': `Bearer ${this.token}`
+            }
+          });
+          this.username = response.data.username;
+          this.email = response.data.email;
+          this.userLevel = response.data.userLevel;
+        } catch (error) {
+          console.error('Error fetching current user:', error);
+          this.logout(); // 如果获取用户信息失败，执行登出操作
+        }
+      }
+    },
+    
     showWelcomeMessage() {
       if (!this.welcomeMessageShown) {
         this.welcomeMessageShown = true;
@@ -49,7 +67,7 @@ export const useAuthStore = defineStore({
     
       } catch (error) {
         throw new Error(error.response.data || error.message);
-        
+
       }
     },
     
