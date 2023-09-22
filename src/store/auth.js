@@ -10,6 +10,8 @@ export const useAuthStore = defineStore({
     isAuthenticated: !!localStorage.getItem('token'),
     username: null,
     email:null,
+    userLevel: 1,
+    
     welcomeMessageShown: false,
     errorMessage: null, 
     showWelcomeMessage: false,
@@ -38,6 +40,7 @@ export const useAuthStore = defineStore({
           this.isAuthenticated = true;
           this.username = response.data.user.username;
           this.email = response.data.user.email;
+          this.userLevel = response.data.user.userLevel;
           this.showWelcomeMessage = true; // Set this to true upon successful login
           router.push('/');
         } else {
@@ -46,6 +49,7 @@ export const useAuthStore = defineStore({
     
       } catch (error) {
         throw new Error(error.response.data || error.message);
+        
       }
     },
     

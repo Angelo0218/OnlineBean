@@ -1,7 +1,7 @@
 <template>
-  <div class="hero min-h-screen  ">
+  <div class="hero min-h-screen ">
     <div class="hero-content flex-col sm:flex-row-reverse">
-      <img src="../assets/tree.png" class="max-w-xs rounded-lg" />
+      <img src="../assets/tree.png" class="treeimg rounded-lg " />
 
       <div>
         <h1 class="text-5xl font-bold ">線上養殖</h1>
@@ -51,9 +51,7 @@ export default {
 
 
 @media screen and (max-width: 768px) {
-  .hero {
-    margin-top: -2rem
-  }
+
 
   h1 {
     text-align: center;
@@ -77,6 +75,10 @@ export default {
 /* .fade-leave-active in <2.1.8 */
   {
   opacity: 0;
+}
+.treeimg{
+  width:9rem;
+  
 }</style>
 
 

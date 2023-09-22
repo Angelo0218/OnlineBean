@@ -33,6 +33,17 @@ if (localStorage.getItem('token')) {
     })
     .catch(error => {
       console.error("Error fetching user info:", error);
+      if (error.response && error.response.status === 403) {
+        // 如果錯誤狀態碼為 403，清除本地 token 並更新用戶認證狀態
+        localStorage.removeItem('token');
+        const authStore = useAuthStore();
+        authStore.isAuthenticated = false;
+        authStore.token = null;
+        location.reload();
+        // 如果需要，您還可以重定向用戶到登錄頁面
+        // router.push('/login');
+      }
+  
     });
 }
 

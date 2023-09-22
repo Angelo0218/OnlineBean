@@ -3,15 +3,22 @@
         <div class="alert flex justify-center">
             <span class="text-3xl">選擇植物</span>
         </div>
-        <div v-for="plant in plants" :key="plant.plantID" class="card card-compact w-96 bg-base-100 shadow-xl">
-            <figure>
-                <img :src="plant.image" :alt="plant.plantName" />
-            </figure>
-            <div class="card-body">
-                <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
-                <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
-                <div class="card-actions justify-center">
-                    <router-link class="btn btn-primary" to="/online">選這個</router-link>
+        <!-- Display loading spinner while loading -->
+        <div v-if="loading" class="flex justify-center w-full">
+            <span class="loading loading-spinner text-success"></span>
+        </div>
+        <!-- Display content when loading is finished -->
+        <div v-else>
+            <div v-for="plant in plants" :key="plant.plantID" class="card card-compact w-96 bg-base-100 shadow-xl">
+                <figure>
+                    <img :src="plant.image" :alt="plant.plantName" />
+                </figure>
+                <div class="card-body">
+                    <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
+                    <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
+                    <div class="card-actions justify-center">
+                        <router-link class="btn btn-primary" to="/online">選這個</router-link>
+                    </div>
                 </div>
             </div>
         </div>
@@ -24,7 +31,8 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            plants: []
+            plants: [],
+            loading: true // 初始化 loading 状态为 true
         };
     },
     async mounted() {
@@ -38,6 +46,8 @@ export default {
             this.plants = response.data;
         } catch (error) {
             console.error('Error fetching plants:', error);
+        } finally {
+            this.loading = false; // 设置 loading 状态为 false，无论请求成功还是失败
         }
     }
 }
@@ -49,4 +59,3 @@ img {
     height: 120px;
 }
 </style>
-  

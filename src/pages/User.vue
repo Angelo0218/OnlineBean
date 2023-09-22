@@ -5,17 +5,21 @@
                 <span class="title">用戶資訊</span>
             </div>
             <div class="content">
+                <div class="info" v-if="userLevel">
+                    <span class="icon">	&#128081;</span> <!-- 星星圖標 -->
+                    <span class="label">會員等級:</span>
+                    <span class="value">{{ userLevel }}</span>
+                </div>
                 <div class="info" v-if="username">
+                    <span class="icon">&#128100;</span> <!-- 用戶圖標 -->
                     <span class="label">用戶名:</span>
                     <span class="value">{{ username }}</span>
                 </div>
                 <div class="info" v-if="email">
+                    <span class="icon">&#9993;</span> <!-- 郵件圖標 -->
                     <span class="label">電子郵件:</span>
                     <span class="value">{{ email }}</span>
                 </div>
-                <div class="info"></div>
-                <span class="label">會員等級:</span>
-                <span class="value"></span>
             </div>
         </div>
     </div>
@@ -30,14 +34,17 @@ export default {
         const authStore = useAuthStore();
         const username = ref(authStore.username);
         const email = ref(authStore.email);
+        const userLevel = ref(authStore.userLevel);
         watchEffect(() => {
             username.value = authStore.username;
             email.value = authStore.email;
+            userLevel.value = authStore.userLevel;
         });
 
         return {
             username,
             email,
+            userLevel
         };
     }
 }
@@ -59,15 +66,21 @@ export default {
     max-width: 400px;
     width: 100%;
     overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+
+.user-card:hover {
+    transform: scale(1.05); /* 添加放大效果 */
 }
 
 .header {
     background-color: #2d3748;
     padding: 20px;
+    position: relative;
 }
 
 .title {
-    font-size: 24px;
+    font-size: 28px; /* 增加字體大小 */
     font-weight: 700;
 }
 
@@ -76,7 +89,15 @@ export default {
 }
 
 .info {
+    display: flex;
+    align-items: center;
     margin-bottom: 15px;
+}
+
+.icon {
+    font-size: 24px;
+    margin-right: 10px;
+    color: #48bb78; /* 圖標顏色 */
 }
 
 .label {
@@ -85,5 +106,6 @@ export default {
 
 .value {
     font-weight: 400;
-    margin-left: 10px;
-}</style>
+    margin-left: 5px;
+}
+</style>
