@@ -86,7 +86,7 @@ function authenticateSpecificUser(req, res, next) {
 app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
     const {  plantName, plantDescription, image } = req.body;
 
-    const query = 'INSERT INTO plants ( plantName, plantDescription, image) VALUES (?, ?, ?, ?)';
+    const query = 'INSERT INTO plants ( plantName, plantDescription, image) VALUES (?, ?, ?)';
 
     
     db.query(query, [ plantName, plantDescription, image], (err, result) => {

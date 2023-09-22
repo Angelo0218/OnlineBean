@@ -48,9 +48,7 @@ export default {
 </script>
 
 <style>
-.hero {
-  margin-top: -30px;
-}
+
 
 @media screen and (max-width: 768px) {
   .hero {

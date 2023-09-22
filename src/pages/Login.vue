@@ -36,22 +36,11 @@
                         </div>
 
 
-                        <!-- 記住我選項 -->
-                        <div class="flex items-center justify-between pt-5 pb-5">
-                            <div class="flex items-start">
-                                <div class="flex items-center h-5">
-                                    <input id="remember" aria-describedby="remember" type="checkbox"
-                                        class="w-4 h-4 border rounded focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800">
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label for="remember" class="text-blue-500">記住我</label>
-                                </div>
-                            </div>
-                        </div>
+                     
 
                         <!-- 登入按鈕 -->
                         <button @click="handleLogin"
-                            class="btn w-full focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">登入</button>
+                            class="btn w-full focus:ring-4 mt-10 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">登入</button>
                     </form>
                         </div>
                        
