@@ -10,7 +10,7 @@ export const useAuthStore = defineStore({
     isAuthenticated: !!localStorage.getItem('token'),
     username: null,
     email:null,
-    userLevel: 1,
+    userLevel: null,
     
     welcomeMessageShown: false,
     errorMessage: null, 
@@ -25,15 +25,19 @@ export const useAuthStore = defineStore({
               'Authorization': `Bearer ${this.token}`
             }
           });
+          // 确保从响应体中正确地获取 userLevel 属性
           this.username = response.data.username;
           this.email = response.data.email;
-          this.userLevel = response.data.userLevel;
+          this.userLevel = response.data.userLevel; // 确保这里是正确的路径
+          console.log(response.data);
+
         } catch (error) {
           console.error('Error fetching current user:', error);
           this.logout(); // 如果获取用户信息失败，执行登出操作
         }
       }
     },
+    
     
     showWelcomeMessage() {
       if (!this.welcomeMessageShown) {

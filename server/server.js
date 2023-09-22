@@ -197,7 +197,8 @@ app.get('/api/currentUser', authenticateJWT, (req, res) => {
         const user = results[0];
         res.status(200).json({
             username: user.username,
-            email: user.email
+            email: user.email,
+            userLevel: user.userLevel,
         });
     });
 });
