@@ -6,7 +6,7 @@
             </div>
             <div class="content">
                 <div class="info" v-if="userLevel">
-                    <span class="icon">	&#128081;</span> <!-- 星星圖標 -->
+                    <span class="icon"> &#128081;</span> <!-- 星星圖標 -->
                     <span class="label">會員等級:</span>
                     <span class="value">{{ userLevel }}</span>
                 </div>
@@ -20,13 +20,18 @@
                     <span class="label">電子郵件:</span>
                     <span class="value">{{ email }}</span>
                 </div>
+                <div class="info" v-if="creationDate">
+                    <span class="icon">🖋️</span> <!-- 郵件圖標 -->
+                    <span class="label">建立時間:</span>
+                    <span class="value">{{ formattedCreationDate }}</span>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect, computed } from 'vue';
 import { useAuthStore } from '../store/auth.js';
 
 export default {
@@ -35,18 +40,45 @@ export default {
         const username = ref(authStore.username);
         const email = ref(authStore.email);
         const userLevel = ref(authStore.userLevel);
-        console.log(authStore.userLevel);
+        const creationDate = ref(authStore.creationDate);
+
         watchEffect(() => {
-            
+            console.log("Raw creationDate:", authStore.creationDate);
             username.value = authStore.username;
             email.value = authStore.email;
             userLevel.value = authStore.userLevel;
+            creationDate.value = authStore.creationDate;
         });
+        const formattedCreationDate = computed(() => {
+    if (creationDate.value) {
+        const date = new Date(creationDate.value);
+        console.log("Date object:", date);
+        try {
+            const formatted = date.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                
+            });
+            console.log("Formatted creationDate:", formatted);
+            return formatted;
+        } catch (error) {
+            console.error("Error formatting date:", error);
+        }
+    }
+    return '';
+});
+
+
+
+
 
         return {
             username,
             email,
-            userLevel
+            userLevel,
+            creationDate, 
+    formattedCreationDate,
         };
     }
 }
@@ -58,35 +90,44 @@ export default {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    margin-top: 0; /* 调整顶部边距 */
+    margin-top: 0;
+    /* 调整顶部边距 */
 }
 
 @media screen and (max-width: 640px) {
     .container {
         align-items: start;
-        margin-top:20%; /* 移动端设备上调整顶部边距 */
-        padding: 10px; /* 增加一些填充，以防止卡片贴近边缘 */
+        margin-top: 20%;
+        /* 移动端设备上调整顶部边距 */
+        padding: 10px;
+        /* 增加一些填充，以防止卡片贴近边缘 */
     }
 
     .user-card {
-        border-radius: 10px; /* 调整边框半径 */
-        box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* 调整阴影效果 */
+        border-radius: 10px;
+        /* 调整边框半径 */
+        box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+        /* 调整阴影效果 */
     }
 
     .title {
-        font-size: 22px; /* 调整字体大小 */
+        font-size: 22px;
+        /* 调整字体大小 */
     }
 
     .icon {
-        font-size: 20px; /* 调整图标大小 */
+        font-size: 20px;
+        /* 调整图标大小 */
     }
 
     .info {
-        margin-bottom: 10px; /* 调整信息块的底部边距 */
+        margin-bottom: 10px;
+        /* 调整信息块的底部边距 */
     }
 
     .content {
-        padding: 15px; /* 调整内容区域的填充 */
+        padding: 15px;
+        /* 调整内容区域的填充 */
     }
 }
 

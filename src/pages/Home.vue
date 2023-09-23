@@ -10,46 +10,63 @@
       </div>
     </div>
     <transition name="fade">
-      <div v-if="showWelcome && isAuthenticated"
+      <div v-if="showWelcome && isAuthenticated && isUserLevelLoaded"
         class="bg-green-200 text-amber-800 mt-129 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
-        登入成功歡迎！
+        {{ welcomeMessage }}
       </div>
     </transition>
+
+
 
   </div>
 </template>
 <script>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '../store/auth.js';
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const showWelcome = ref(authStore.showWelcomeMessage);
+    const isUserLevelLoaded = ref(false); // 新增用來追踪用戶等級數據加載狀態的 ref
+
+    const welcomeMessage = computed(() => {
+      if (authStore.userLevel >= 90) {
+        return '爸爸好！🧛';
+      } else {
+        return '登入成功歡迎！';
+      }
+    });
 
     onMounted(() => {
+      // 假設在某一點用戶等級數據會被加載
+      // 在數據加載完成後設置 isUserLevelLoaded 為 true
+      isUserLevelLoaded.value = true;
+
       if (showWelcome.value) {
         setTimeout(() => {
           showWelcome.value = false;
-        }, 3000);  // 歡迎消息將在3秒後消失
+        }, 3000);
       }
     });
+
     onUnmounted(() => {
       authStore.hideWelcomeMessage();
     });
 
-
     return {
       isAuthenticated: authStore.isAuthenticated,
-      showWelcome
+      showWelcome,
+      welcomeMessage,
+      isUserLevelLoaded
     };
   }
 }
 </script>
 
+
+
 <style>
-
-
 @media screen and (max-width: 644px) {
 
 
@@ -76,9 +93,11 @@ export default {
   {
   opacity: 0;
 }
-.treeimg{
-  width:9rem;
-  
-}</style>
+
+.treeimg {
+  width: 9rem;
+
+}
+</style>
 
 

@@ -54,9 +54,11 @@
   
   <style scoped>
   .terms-container {
-    padding: 20px;
+ padding-top:100px;
+  
     max-width: 800px;
     margin: auto;
+    align-items: start;
   }
   
   h1 {
