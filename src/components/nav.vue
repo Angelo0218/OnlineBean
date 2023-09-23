@@ -6,7 +6,7 @@
                     <span class="mr-2 "><img src="../assets/Logo.ico" style="width:20px; height:20px;" alt="Logo"></span>
                     ONlineBean
                 </a>
-                <div class="dropdown">
+                <div class="dropdown sm:hidden ">
                     <div tabindex="0" class="btn btn-ghost sm:hidden mobile-menu-btn" @click="toggleMobileDropdown">
                         <i class="fa-solid fa-bars "></i>
                     </div>
@@ -69,7 +69,7 @@ export default {
         };
         watchEffect(() => {
             isAuthenticated.value = authStore.isAuthenticated;
-            username.value = authStore.username;  // 新增這一行
+            username.value = authStore.username;  
         });
 
 

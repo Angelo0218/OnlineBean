@@ -138,7 +138,7 @@ app.post('/login', (req, res) => {
     const { identifier, password } = req.body;
 
     // 從資料庫中查找用戶
-    const query = 'SELECT username, password, email, userLevel  FROM users WHERE username = ? OR email = ?';
+    const query = 'SELECT username, password, email, userLevel, creationDate  FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
         if (err) {
             return res.status(500).send('資料庫查詢錯誤');
@@ -165,6 +165,8 @@ app.post('/login', (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
+                userLevel:user.userLevel,
+                creationDate:user.creationDate,
              
             }
         });
@@ -186,7 +188,7 @@ app.get('/api/currentUser', authenticateJWT, (req, res) => {
     const username = req.user.username;  // 從 JWT 中獲取用戶名
 
     // 從資料庫中查找用戶信息
-    const query = 'SELECT username, email, userLevel FROM users WHERE username = ?';
+    const query = 'SELECT username, email, userLevel, creationDate FROM users WHERE username = ?';
     db.query(query, [username], (err, results) => {
         if (err) {
             return res.status(500).send('資料庫查詢錯誤');
@@ -199,6 +201,7 @@ app.get('/api/currentUser', authenticateJWT, (req, res) => {
             username: user.username,
             email: user.email,
             userLevel: user.userLevel,
+            creationDate:user.creationDate
         });
     });
 });

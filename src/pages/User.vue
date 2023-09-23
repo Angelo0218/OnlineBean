@@ -35,7 +35,9 @@ export default {
         const username = ref(authStore.username);
         const email = ref(authStore.email);
         const userLevel = ref(authStore.userLevel);
+        console.log(authStore.userLevel);
         watchEffect(() => {
+            
             username.value = authStore.username;
             email.value = authStore.email;
             userLevel.value = authStore.userLevel;
