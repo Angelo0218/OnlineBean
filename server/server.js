@@ -165,7 +165,7 @@ app.post('/login', (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
-                userLevel: user.userLevel
+             
             }
         });
     });

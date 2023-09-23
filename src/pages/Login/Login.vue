@@ -57,7 +57,7 @@
 
 import { ref, onMounted } from 'vue';
 
-import { useAuthStore } from '../store/auth.js'; // 引入我們的 auth store
+import { useAuthStore } from '../../store/auth.js'; // 引入我們的 auth store
 
 
 export default {

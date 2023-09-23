@@ -1,5 +1,5 @@
 <template>
-    <div class="container pt-20">
+    <div class="container ">
         <div class="user-card">
             <div class="header">
                 <span class="title">用戶資訊</span>
@@ -56,6 +56,36 @@ export default {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    margin-top: 0; /* 调整顶部边距 */
+}
+
+@media screen and (max-width: 640px) {
+    .container {
+        align-items: start;
+        margin-top:20%; /* 移动端设备上调整顶部边距 */
+        padding: 10px; /* 增加一些填充，以防止卡片贴近边缘 */
+    }
+
+    .user-card {
+        border-radius: 10px; /* 调整边框半径 */
+        box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* 调整阴影效果 */
+    }
+
+    .title {
+        font-size: 22px; /* 调整字体大小 */
+    }
+
+    .icon {
+        font-size: 20px; /* 调整图标大小 */
+    }
+
+    .info {
+        margin-bottom: 10px; /* 调整信息块的底部边距 */
+    }
+
+    .content {
+        padding: 15px; /* 调整内容区域的填充 */
+    }
 }
 
 .user-card {
@@ -69,10 +99,6 @@ export default {
     transition: transform 0.3s ease-in-out;
 }
 
-.user-card:hover {
-    transform: scale(1.05); /* 添加放大效果 */
-}
-
 .header {
     background-color: #2d3748;
     padding: 20px;
@@ -80,7 +106,7 @@ export default {
 }
 
 .title {
-    font-size: 28px; /* 增加字體大小 */
+    font-size: 28px;
     font-weight: 700;
 }
 
@@ -97,7 +123,7 @@ export default {
 .icon {
     font-size: 24px;
     margin-right: 10px;
-    color: #48bb78; /* 圖標顏色 */
+    color: #48bb78;
 }
 
 .label {
@@ -109,3 +135,4 @@ export default {
     margin-left: 5px;
 }
 </style>
+
