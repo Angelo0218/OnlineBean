@@ -221,7 +221,7 @@ app.get('/api/userPlants', authenticateJWT, async (req, res) => {
 app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
     const userId = req.user.userId; // 從JWT獲取用戶ID
     const plantId = req.query.plantId; // 從查詢參數獲取plantId
-
+    console.log(userId, plantId);
     // 檢查該用戶是否有權訪問該植物
     const checkAuthorizationQuery = 'SELECT * FROM user_plants WHERE user_id = ? AND plant_id = ?';
     try {
