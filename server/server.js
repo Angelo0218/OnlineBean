@@ -1,48 +1,53 @@
 import express from 'express';
-import { createPool } from 'mysql2/promise';
+import mysql from 'mysql';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 
+// 讀取 .env 配置文件中的環境變量
 dotenv.config();
 
 const app = express();
 const port = 3000;
-const secret = process.env.JWT_SECRET;
-const dbPassword = process.env.DB_PASSWORD;
+const secret = process.env.JWT_SECRET;  // JWT 密鑰
+const dbPassword = process.env.DB_PASSWORD;  // 資料庫密碼
 const DB_USER = process.env.DB_USER;
 const DB_IP = process.env.DB_IP;
 const DB_DATABASE = process.env.DB_DATABASE;
-
+// 允許跨域請求
 app.use(cors());
+// 中介軟體，用於解析 JSON 請求
 app.use(express.json());
-
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000,  // 15 分鐘的時間窗口
+    max: 100,  // 在時間窗口內最多可以發出的請求數
     message: "太多請求了，請稍後再試。"
-});
+  });
+  
+  // 使用速率限制中間件
+  app.use('/login', limiter);
+  app.use('/register', limiter);
+  
 
-app.use('/login', limiter);
-app.use('/register', limiter);
 
-// 创建连接池
-const db = createPool({
+// 資料庫配置和連接
+const db = mysql.createConnection({
     host: DB_IP,
     user: DB_USER,
     password: dbPassword,
     database: DB_DATABASE
 });
 
-// 使用连接池进行查询
-db.query('SELECT 1 + 1 AS solution')
-    .then(([rows, fields]) => {
-        console.log('資料庫已連接', rows);
-    })
-    .catch(err => console.error('資料庫連接失敗:', err));
-
+// 初始化資料庫連接
+db.connect(err => {
+    if (err) {
+        console.error('資料庫連接失敗:', err.stack);
+        return;
+    }
+    console.log('資料庫已連接');
+});
 
 // JWT 驗證中介層：確保請求帶有有效的 JWT
 function authenticateJWT(req, res, next) {
