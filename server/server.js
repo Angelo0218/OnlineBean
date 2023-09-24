@@ -193,6 +193,31 @@ app.get('/api/currentUser', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫查詢錯誤');
     }
 });
+app.get('/api/userPlants', authenticateJWT, async (req, res) => {
+    const username = req.user.username;
+
+    // 获取用户ID
+    const userIdQuery = 'SELECT userID FROM users WHERE username = ?';
+    try {
+        const [userResults] = await db.query(userIdQuery, [username]);
+        if (userResults.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+        const userId = userResults[0].userID;
+
+        // 根据用户ID查询其植物背包中的植物
+        const userPlantsQuery = `
+            SELECT plants.plantID, plants.plantName, plants.plantDescription, plants.image
+            FROM user_plants
+            JOIN plants ON user_plants.plant_id = plants.plantID
+            WHERE user_plants.user_id = ?`;
+
+        const [plantsResults] = await db.query(userPlantsQuery, [userId]);
+        res.status(200).json(plantsResults);
+    } catch (err) {
+        res.status(500).send('資料庫查詢錯誤: ' + err.message);
+    }
+});
 
 
 app.listen(port, () => {
