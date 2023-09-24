@@ -1,14 +1,14 @@
 <template>
-    <div class="container ">
+    <div class="container">
         <div class="user-card">
             <div class="header">
                 <span class="title">用戶資訊</span>
             </div>
             <div class="content">
-                <div class="info" v-if="userLevel">
+                <div class="info" v-if="role">
                     <span class="icon"> &#128081;</span> <!-- 星星圖標 -->
-                    <span class="label">會員等級:</span>
-                    <span class="value">{{ userLevel }}</span>
+                    <span class="label">用戶角色:</span>
+                    <span class="value">{{ roleInChinese }}</span>
                 </div>
                 <div class="info" v-if="username">
                     <span class="icon">&#128100;</span> <!-- 用戶圖標 -->
@@ -39,28 +39,36 @@ export default {
         const authStore = useAuthStore();
         const username = ref(authStore.username);
         const email = ref(authStore.email);
-        const userLevel = ref(authStore.userLevel);
+        const role = ref(authStore.role);
         const creationDate = ref(authStore.creationDate);
 
         watchEffect(() => {
-            console.log("Raw creationDate:", authStore.creationDate);
             username.value = authStore.username;
             email.value = authStore.email;
-            userLevel.value = authStore.userLevel;
+            role.value = authStore.role;
             creationDate.value = authStore.creationDate;
         });
+
+        const roleInChinese = computed(() => {
+            switch (role.value) {
+                case 'admin':
+                    return '管理員';
+                case 'authorized_user':
+                    return '白金用戶';
+                case 'regular_user':
+                    return '普通用戶';
+            }
+        });
+
         const formattedCreationDate = computed(() => {
             if (creationDate.value) {
                 const date = new Date(creationDate.value);
-                console.log("Date object:", date);
                 try {
                     const formatted = date.toLocaleDateString('zh-CN', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
-
                     });
-                    console.log("Formatted creationDate:", formatted);
                     return formatted;
                 } catch (error) {
                     console.error("Error formatting date:", error);
@@ -69,15 +77,12 @@ export default {
             return '';
         });
 
-
-
-
-
         return {
             username,
             email,
-            userLevel,
+            role,
             creationDate,
+            roleInChinese,
             formattedCreationDate,
         };
     }
