@@ -60,11 +60,11 @@ export default {
                 });
                 alert('植物選擇成功！');
             } catch (error) {
-                console.error('Error in /choosePlant:', err);
+                console.error('Error choosing plant:', error);
                 alert('選擇植物失敗，請稍後再試！');
-                res.status(500).send('資料庫操作錯誤: ' + err.message);
             }
         }
+
     }
 }
 </script>
