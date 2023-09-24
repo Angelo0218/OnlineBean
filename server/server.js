@@ -218,6 +218,33 @@ app.get('/api/userPlants', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫查詢錯誤: ' + err.message);
     }
 });
+app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
+    const userId = req.user.userId; // 從JWT獲取用戶ID
+    const plantId = req.query.plantId; // 從查詢參數獲取plantId
+
+    // 檢查該用戶是否有權訪問該植物
+    const checkAuthorizationQuery = 'SELECT * FROM user_plants WHERE user_id = ? AND plant_id = ?';
+    try {
+        const [authorizationResults] = await db.query(checkAuthorizationQuery, [userId, plantId]);
+        if (authorizationResults.length === 0) {
+            return res.status(403).send('您沒有訪問該植物的權限');
+        }
+
+        // 如果用戶有權訪問，則繼續處理請求，獲取植物詳細信息並返回給用戶
+        const getPlantDetailsQuery = 'SELECT * FROM plants WHERE plantID = ?';
+        const [plantDetailsResults] = await db.query(getPlantDetailsQuery, [plantId]);
+        
+        if (plantDetailsResults.length === 0) {
+            return res.status(404).send('植物未找到');
+        }
+        
+        // 返回植物詳細信息
+        res.status(200).json(plantDetailsResults[0]);
+
+    } catch (err) {
+        res.status(500).send('資料庫操作錯誤: ' + err.message);
+    }
+});
 
 
 app.listen(port, () => {

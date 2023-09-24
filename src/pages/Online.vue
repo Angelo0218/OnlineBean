@@ -19,11 +19,17 @@
 </template>
 <script>
 
+import { useRoute } from 'vue-router';
 
 export default {
-
-
+    setup() {
+        const route = useRoute();
+        const plantId = route.query.plantId;
+        
+        // 這裡您可以使用 plantId 來獲取和顯示相關的植物信息
+    }
 }
+
 </script>
 <style scoped>
 img {
