@@ -75,13 +75,13 @@ app.post('/choosePlant', authenticateJWT, async (req, res) => {
     const username = req.user.username;
     const { plantId } = req.body;
 
-    const checkRoleQuery = 'SELECT id, role FROM users WHERE username = ?';
+    const checkRoleQuery = 'SELECT userID, role FROM users WHERE username = ?';
     try {
         const [results] = await db.query(checkRoleQuery, [username]);
         if (results.length === 0) {
             return res.status(404).send('用戶未找到');
         }
-        const { id: userId, role } = results[0];
+        const { userID: userId, role } = results[0]; // 修改此处，使用 userID 而不是 id
         if (role !== 'authorized_user') {
             return res.status(403).send('您沒有選擇植物的權限');
         }
@@ -95,6 +95,7 @@ app.post('/choosePlant', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫操作錯誤: ' + err.message);
     }
 });
+
 
 
 app.post('/addPlant', authenticateJWT, authenticateSpecificUser, async (req, res) => {
