@@ -32,7 +32,7 @@ export default {
 
     const welcomeMessage = computed(() => {
       if (authStore.userLevel >= 90) {
-        return '尊敬的管理員 好！';
+        return '尊敬的管理員 歡迎你！';
       } else {
         return '登入成功歡迎！';
       }
@@ -81,7 +81,9 @@ export default {
 
 }
 .fade2{
-margin-top:30%;
+  position: relative;
+  top: 35vh;
+
 }
 .fade-enter-active,
 .fade-leave-active {
