@@ -130,7 +130,7 @@ app.post('/register', async (req, res) => {
 // 用戶登入路由
 app.post('/login', (req, res) => {
     const { identifier, password } = req.body;
-
+    console.log("Received login request", req.body);
     // 從資料庫中查找用戶
     const query = 'SELECT username, password, email, userLevel, creationDate  FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
