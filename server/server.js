@@ -76,23 +76,25 @@ function authenticateSpecificUser(req, res, next) {
     }
     next();
 }
-
-app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
+app.post('/addPlant', authenticateJWT, authenticateSpecificUser, async (req, res) => {
+    console.log('開始處理 /addPlant 路由');
     const { plantName, plantDescription, image } = req.body;
 
-    const query = 'INSERT INTO plants ( plantName, plantDescription, image) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO plants (plantName, plantDescription, image) VALUES (?, ?, ?)';
 
-
-    db.query(query, [plantName, plantDescription, image], (err, result) => {
-        if (err) {
-            return res.status(500).send('資料庫寫入錯誤: ' + err.message);
-        }
+    try {
+        await db.query(query, [plantName, plantDescription, image]);
         res.status(200).send('資料已成功新增！');
-    });
+    } catch (err) {
+        console.error('資料庫寫入錯誤:', err);
+        res.status(500).send('資料庫寫入錯誤: ' + err.message);
+    }
+    console.log('結束處理 /addPlant 路由');
 });
 
 // 註冊新用戶
 app.post('/register', async (req, res) => {
+    console.log('開始處理 /register 路由');
     const { username, password, email } = req.body;
 
     // 確保密碼符合規定：至少6個字符
@@ -103,10 +105,8 @@ app.post('/register', async (req, res) => {
 
     // 檢查用戶名或電子郵件是否已存在
     const checkQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
-    db.query(checkQuery, [username, email], async (err, results) => {
-        if (err) {
-            return res.status(500).send('資料庫查詢錯誤');
-        }
+    try {
+        const [results] = await db.query(checkQuery, [username, email]);
         if (results.length > 0) {
             return res.status(400).send('用戶名或電子郵件已存在');
         }
@@ -117,48 +117,44 @@ app.post('/register', async (req, res) => {
         // 將新用戶資料儲存到資料庫
         const currentDate = new Date().toISOString().slice(0, 10);  // 取得當前日期並格式化為 YYYY-MM-DD
         const query = 'INSERT INTO users (username, password, email, creationDate) VALUES (?, ?, ?, ?)';
-        db.query(query, [username, hashedPassword, email, currentDate], (err, result) => {
-            if (err) {
-                return res.status(500).send('資料庫寫入錯誤');
-            }
-            res.status(200).send('註冊成功！');
-        });
-    });
+        await db.query(query, [username, hashedPassword, email, currentDate]);
+        res.status(200).send('註冊成功！');
+    } catch (err) {
+        console.error('資料庫查詢錯誤:', err);
+        res.status(500).send('資料庫查詢錯誤');
+    }
+    console.log('結束處理 /register 路由');
 });
 
 
 // 用戶登入路由
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
+    console.log("開始處理 /login 路由");
     const { identifier, password } = req.body;
-    console.log("Received login request", req.body);
+    
     // 從資料庫中查找用戶
-    const query = 'SELECT username, password, email, userLevel, creationDate  FROM users WHERE username = ? OR email = ?';
-    db.query(query, [identifier, identifier], async (err, results) => {
-        if (err) {
-            console.error("Database query error:", err);
-            return res.status(500).send('資料庫查詢錯誤');
-        }
-
-        console.log("Database query results:", results);
-
+    const query = 'SELECT username, password, email, userLevel, creationDate FROM users WHERE username = ? OR email = ?';
+    
+    try {
+        const [results] = await db.query(query, [identifier, identifier]);
+        console.log("資料庫查詢結果:", results);
+        
         if (results.length === 0) {
             return res.status(401).send('用戶名不存在');
         }
-
+        
         const user = results[0];
         const passwordIsValid = await bcrypt.compare(password, user.password);
-
-        console.log("Password validation result:", passwordIsValid);
-
+        console.log("密碼驗證結果:", passwordIsValid);
+        
         if (!passwordIsValid) {
             return res.status(401).send('密碼錯誤');
         }
-
+        
         // 生成 JWT
         const token = jwt.sign({ username: user.username }, secret, { expiresIn: '1h' });
-
-        console.log("Generated token:", token);
-
+        console.log("生成的token:", token);
+        
         // 返回令牌和用戶資訊
         res.status(200).json({
             message: '登入成功！',
@@ -170,8 +166,14 @@ app.post('/login', (req, res) => {
                 creationDate: user.creationDate,
             }
         });
-    });
+    } catch (err) {
+        console.error("資料庫查詢錯誤:", err);
+        return res.status(500).send('資料庫查詢錯誤');
+    }
+    
+    console.log("結束處理 /login 路由");
 });
+
 
 app.get('/api/plants', authenticateJWT, (_, res) => {
     const query = 'SELECT * FROM plants';
