@@ -11,7 +11,7 @@
     </div>
     <transition name="fade">
       <div v-if="showWelcome && isAuthenticated && isUserLevelLoaded"
-        class="bg-green-200 text-amber-800 mt-129 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
+        class="bg-green-200 text-amber-800  fade2 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
         {{ welcomeMessage }}
       </div>
     </transition>
@@ -32,7 +32,7 @@ export default {
 
     const welcomeMessage = computed(() => {
       if (authStore.userLevel >= 90) {
-        return '爸爸好！🧛';
+        return '尊敬的管理員 好！';
       } else {
         return '登入成功歡迎！';
       }
@@ -80,7 +80,9 @@ export default {
 
 
 }
-
+.fade2{
+margin-top:30%;
+}
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
@@ -98,6 +100,7 @@ export default {
   width: 9rem;
 
 }
+
 </style>
 
 

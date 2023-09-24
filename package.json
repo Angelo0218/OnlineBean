@@ -22,6 +22,7 @@
     "express-rate-limit": "^6.11.2",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.6.1",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-router": "^4.0.13"

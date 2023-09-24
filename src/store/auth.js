@@ -73,7 +73,8 @@ export const useAuthStore = defineStore({
               this.userLevel = response.data.userLevel;
               this.creationDate = response.data.creationDate; // 確保這裡是正確的屬性名稱
           } catch (error) {
-              console.error('Error fetching current user:', error);
+            console.error('Error fetching current user:', error.response || error);
+
               this.logout(); // 如果獲取用戶信息失敗，執行登出操作
           }
       }

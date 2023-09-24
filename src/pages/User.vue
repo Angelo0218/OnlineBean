@@ -50,24 +50,24 @@ export default {
             creationDate.value = authStore.creationDate;
         });
         const formattedCreationDate = computed(() => {
-    if (creationDate.value) {
-        const date = new Date(creationDate.value);
-        console.log("Date object:", date);
-        try {
-            const formatted = date.toLocaleDateString('zh-CN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                
-            });
-            console.log("Formatted creationDate:", formatted);
-            return formatted;
-        } catch (error) {
-            console.error("Error formatting date:", error);
-        }
-    }
-    return '';
-});
+            if (creationDate.value) {
+                const date = new Date(creationDate.value);
+                console.log("Date object:", date);
+                try {
+                    const formatted = date.toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+
+                    });
+                    console.log("Formatted creationDate:", formatted);
+                    return formatted;
+                } catch (error) {
+                    console.error("Error formatting date:", error);
+                }
+            }
+            return '';
+        });
 
 
 
@@ -77,8 +77,8 @@ export default {
             username,
             email,
             userLevel,
-            creationDate, 
-    formattedCreationDate,
+            creationDate,
+            formattedCreationDate,
         };
     }
 }

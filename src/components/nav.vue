@@ -2,10 +2,10 @@
     <header>
         <nav class="navbar bg-base-100">
             <div class="navbar-start ">
-                <a class="btn btn-ghost normal-case text-xl flex items-center max-sm:hidden">
+                <router-link to="/" class="btn btn-ghost normal-case text-xl flex items-center max-sm:hidden">
                     <span class="mr-2 "><img src="../assets/Logo.ico" style="width:20px; height:20px;" alt="Logo"></span>
                     ONlineBean
-                </a>
+                </router-link>
                 <div class="dropdown sm:hidden ">
                     <div tabindex="0" class="btn btn-ghost sm:hidden mobile-menu-btn" @click="toggleMobileDropdown">
                         <i class="fa-solid fa-bars "></i>
