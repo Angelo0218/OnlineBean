@@ -54,11 +54,50 @@ function authenticateJWT(req, res, next) {
 
 function authenticateSpecificUser(req, res, next) {
     const user = req.user;
-    if (user.username !== 'Angelo0218') {
-        return res.status(403).send('Access Denied: Not Authorized');
-    }
-    next();
+    const username = user.username;
+    const query = 'SELECT role FROM users WHERE username = ?';
+    db.query(query, [username])
+        .then(([results]) => {
+            if (results.length === 0) {
+                return res.status(404).send('用戶未找到');
+            }
+            const { role } = results[0];
+            if (role !== 'admin') { // 修改為檢查 admin 角色
+                return res.status(403).send('Access Denied: Not Authorized');
+            }
+            next();
+        })
+        .catch(err => {
+            res.status(500).send('資料庫查詢錯誤: ' + err.message);
+        });
 }
+app.post('/choosePlant', authenticateJWT, async (req, res) => {
+    const username = req.user.username;
+    const { plantId } = req.body;
+
+    // 檢查用戶角色是否為 authorized_user
+    const checkRoleQuery = 'SELECT role FROM users WHERE username = ?';
+    try {
+        const [results] = await db.query(checkRoleQuery, [username]);
+        if (results.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+        const { role } = results[0];
+        if (role !== 'authorized_user') {
+            return res.status(403).send('您沒有選擇植物的權限');
+        }
+
+        // 如果用戶角色為 authorized_user，則處理選擇植物的邏輯
+        // 例如，將用戶選擇的植物信息寫入 user_plants 表
+        const insertQuery = 'INSERT INTO user_plants (user_id, plant_id, planting_date) VALUES (?, ?, ?)';
+        const currentDate = new Date().toISOString().slice(0, 10);
+        await db.query(insertQuery, [username, plantId, currentDate]);
+
+        res.status(200).send('植物選擇成功！');
+    } catch (err) {
+        res.status(500).send('資料庫操作錯誤: ' + err.message);
+    }
+});
 
 app.post('/addPlant', authenticateJWT, authenticateSpecificUser, async (req, res) => {
     const { plantName, plantDescription, image } = req.body;
@@ -87,8 +126,8 @@ app.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const currentDate = new Date().toISOString().slice(0, 10);
-        const query = 'INSERT INTO users (username, password, email, creationDate) VALUES (?, ?, ?, ?)';
-        await db.query(query, [username, hashedPassword, email, currentDate]);
+        const query = 'INSERT INTO users (username, password, email, creationDate, role) VALUES (?, ?, ?, ?, ?)';
+        await db.query(query, [username, hashedPassword, email, currentDate, 'regular_user']); // 設定默認角色為 'regular_user'
         res.status(200).send('註冊成功！');
     } catch (err) {
         res.status(500).send('資料庫查詢錯誤');
@@ -97,19 +136,19 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
-    const query = 'SELECT username, password, email, userLevel, creationDate FROM users WHERE username = ? OR email = ?';
+    const query = 'SELECT username, password, email, role, creationDate FROM users WHERE username = ? OR email = ?';
     try {
         const [results] = await db.query(query, [identifier, identifier]);
         if (results.length === 0) {
             return res.status(401).send('用戶名不存在');
         }
-        
+
         const user = results[0];
         const passwordIsValid = await bcrypt.compare(password, user.password);
         if (!passwordIsValid) {
             return res.status(401).send('密碼錯誤');
         }
-        
+
         const token = jwt.sign({ username: user.username }, secret, { expiresIn: '1h' });
         res.status(200).json({
             message: '登入成功！',
@@ -117,7 +156,7 @@ app.post('/login', async (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
-                userLevel: user.userLevel,
+                role: user.role,
                 creationDate: user.creationDate,
             }
         });
@@ -138,7 +177,7 @@ app.get('/api/plants', authenticateJWT, async (_, res) => {
 
 app.get('/api/currentUser', authenticateJWT, async (req, res) => {
     const username = req.user.username;
-    const query = 'SELECT username, email, userLevel, creationDate FROM users WHERE username = ?';
+    const query = 'SELECT username, email, role, creationDate FROM users WHERE username = ?'; // 修改了這裡
     try {
         const [results] = await db.query(query, [username]);
         if (results.length === 0) {
@@ -148,13 +187,14 @@ app.get('/api/currentUser', authenticateJWT, async (req, res) => {
         res.status(200).json({
             username: user.username,
             email: user.email,
-            userLevel: user.userLevel,
+            role: user.role, // 修改了這裡
             creationDate: user.creationDate
         });
     } catch (err) {
         res.status(500).send('資料庫查詢錯誤');
     }
 });
+
 
 app.listen(port, () => {
     console.log(`伺服器正在運行，地址：http://localhost:${port}`);

@@ -16,7 +16,7 @@
                 <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
                 <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
                 <div class="card-actions justify-center">
-                    <router-link class="btn btn-primary" to="/online">選這個</router-link>
+                    <button @click="choosePlant(plant.plantID)" class="btn btn-primary">選這個</button>
                 </div>
             </div>
         </div>
@@ -30,11 +30,11 @@ export default {
     data() {
         return {
             plants: [],
-            loading: true // 初始化 loading 状态为 true
+            loading: true
         };
     },
     async mounted() {
-        const token = localStorage.getItem('token'); // 從 localStorage 中獲取 token
+        const token = localStorage.getItem('token');
         try {
             const response = await axios.get('http://angelo0218-server.ddns.net:3000/api/plants', {
                 headers: {
@@ -45,7 +45,25 @@ export default {
         } catch (error) {
             console.error('Error fetching plants:', error);
         } finally {
-            this.loading = false; // 设置 loading 状态为 false，无论请求成功还是失败
+            this.loading = false;
+        }
+    },
+    methods: {
+        async choosePlant(plantId) {
+            const token = localStorage.getItem('token');
+            try {
+                await axios.post('http://angelo0218-server.ddns.net:3000/choosePlant', {
+                    plantId
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                alert('植物選擇成功！');
+            } catch (error) {
+                console.error('Error choosing plant:', error);
+                alert('選擇植物失敗，請稍後再試！');
+            }
         }
     }
 }

@@ -10,17 +10,13 @@ export const useAuthStore = defineStore({
     isAuthenticated: !!localStorage.getItem('token'),
     username: null,
     email: null,
-    userLevel: null,
+    role: null, // 添加 role 狀態
     creationDate: null,
-
     welcomeMessageShown: false,
     errorMessage: null,
     showWelcomeMessage: false,
   }),
   actions: {
-
-
-
     showWelcomeMessage() {
       if (!this.welcomeMessageShown) {
         this.welcomeMessageShown = true;
@@ -34,31 +30,23 @@ export const useAuthStore = defineStore({
     async login(identifier, password) {
       try {
         const response = await axios.post('http://angelo0218-server.ddns.net:3000/login', { identifier, password });
-
         if (response.status === 200) {
           this.token = response.data.token;
-
-          // 将 token 存储到 localStorage
           localStorage.setItem('token', this.token);
-
           this.isAuthenticated = true;
           this.username = response.data.user.username;
           this.email = response.data.user.email;
+          this.role = response.data.user.role; // 正確更新 role
           this.creationDate = response.data.user.creationDate;
-          this.userLevel = response.data.user.userLevel;
-        
           this.showWelcomeMessage = true;
           router.push('/');
-
         } else {
           throw new Error(response.data || '登录失败');
         }
-
       } catch (error) {
         throw new Error(error.response.data || error.message);
       }
     },
-
     async fetchCurrentUser() {
       if (this.token) {
           try {
@@ -67,20 +55,17 @@ export const useAuthStore = defineStore({
                       'Authorization': `Bearer ${this.token}`
                   }
               });
-              console.log(response.data); // 打印伺服器返回的數據
+              console.log(response.data);
               this.username = response.data.username;
               this.email = response.data.email;
-              this.userLevel = response.data.userLevel;
-              this.creationDate = response.data.creationDate; // 確保這裡是正確的屬性名稱
+              this.role = response.data.role; // 正確更新 role
+              this.creationDate = response.data.creationDate;
           } catch (error) {
             console.error('Error fetching current user:', error.response || error);
-
-              this.logout(); // 如果獲取用戶信息失敗，執行登出操作
+            this.logout();
           }
       }
-  },
-  
-
+    },
     hideWelcomeMessage() {
       this.showWelcomeMessage = false;
     },
