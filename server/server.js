@@ -78,12 +78,12 @@ function authenticateSpecificUser(req, res, next) {
 }
 
 app.post('/addPlant', authenticateJWT, authenticateSpecificUser, (req, res) => {
-    const {  plantName, plantDescription, image } = req.body;
+    const { plantName, plantDescription, image } = req.body;
 
     const query = 'INSERT INTO plants ( plantName, plantDescription, image) VALUES (?, ?, ?)';
 
-    
-    db.query(query, [ plantName, plantDescription, image], (err, result) => {
+
+    db.query(query, [plantName, plantDescription, image], (err, result) => {
         if (err) {
             return res.status(500).send('資料庫寫入錯誤: ' + err.message);
         }
@@ -135,8 +135,11 @@ app.post('/login', (req, res) => {
     const query = 'SELECT username, password, email, userLevel, creationDate  FROM users WHERE username = ? OR email = ?';
     db.query(query, [identifier, identifier], async (err, results) => {
         if (err) {
+            console.error("Database query error:", err);
             return res.status(500).send('資料庫查詢錯誤');
         }
+
+        console.log("Database query results:", results);
 
         if (results.length === 0) {
             return res.status(401).send('用戶名不存在');
@@ -145,12 +148,16 @@ app.post('/login', (req, res) => {
         const user = results[0];
         const passwordIsValid = await bcrypt.compare(password, user.password);
 
+        console.log("Password validation result:", passwordIsValid);
+
         if (!passwordIsValid) {
             return res.status(401).send('密碼錯誤');
         }
 
         // 生成 JWT
         const token = jwt.sign({ username: user.username }, secret, { expiresIn: '1h' });
+
+        console.log("Generated token:", token);
 
         // 返回令牌和用戶資訊
         res.status(200).json({
@@ -159,9 +166,8 @@ app.post('/login', (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
-                userLevel:user.userLevel,
-                creationDate:user.creationDate,
-             
+                userLevel: user.userLevel,
+                creationDate: user.creationDate,
             }
         });
     });
@@ -195,7 +201,7 @@ app.get('/api/currentUser', authenticateJWT, (req, res) => {
             username: user.username,
             email: user.email,
             userLevel: user.userLevel,
-            creationDate:user.creationDate
+            creationDate: user.creationDate
         });
     });
 });
