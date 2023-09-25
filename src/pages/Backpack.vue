@@ -14,7 +14,7 @@
                 <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
                 <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
                 <div class="card-actions justify-center">
-                    <button @click="selectPlant(plant.plantID)" class="btn btn-primary">選擇植物</button>
+                    <button @click="selectPlant(plant.user_plant_id)" class="btn btn-primary">選擇植物</button>
                 </div>
             </div>
         </div>
@@ -42,6 +42,7 @@ export default {
                 }
             });
             this.userPlants = response.data;
+            console.log(this.userPlants); // 在這裡打印 userPlants 數據
         } catch (error) {
             console.error('Error fetching user plants:', error);
             this.loading = true;
@@ -49,12 +50,23 @@ export default {
             this.loading = false;
         }
     },
+
     setup() {
         const router = useRouter();
 
-        function selectPlant(plantId) {
-            router.push({ path: '/Online', query: { plantId } });
-        }
+        function selectPlant(userPlantId) {
+    // 將 userPlantId 分解為四個部分
+    const parts = userPlantId.split('-');
+    
+    // 重新排列各部分
+    const reorderedId = parts[4]+parts[3] + parts[2] + parts[1] + parts[0];
+    
+    // 使用重新排列的 ID 構造 URL
+    router.push({ path: `/online/${reorderedId}` });
+}
+
+
+
 
         return {
             selectPlant

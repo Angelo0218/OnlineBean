@@ -41,7 +41,7 @@ export const useAuthStore = defineStore({
           this.showWelcomeMessage = true;
           router.push('/');
         } else {
-          throw new Error(response.data || '登录失败');
+          throw new Error(response.data || '登入成功');
         }
       } catch (error) {
         throw new Error(error.response.data || error.message);

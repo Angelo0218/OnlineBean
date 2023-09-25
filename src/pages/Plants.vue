@@ -1,7 +1,7 @@
 <template>
     <main class="flex flex-wrap gap-x-8 gap-y-4 justify-center pt-20">
         <div class="alert flex justify-center">
-            <span class="text-3xl">選擇植物</span>
+            <span class="text-3xl">植物商城</span>
         </div>
         <div v-if="loading" class="flex justify-center w-full">
             <span class="loading loading-spinner text-success"></span>
@@ -60,11 +60,11 @@ export default {
                 });
                 alert('植物選擇成功！');
             } catch (error) {
-                console.error('Error choosing plant:', error);
+                console.error('Error in /choosePlant:', error); // 這裡應該使用 error 而不是 err
                 alert('選擇植物失敗，請稍後再試！');
             }
-        }
 
+        }
     }
 }
 </script>
