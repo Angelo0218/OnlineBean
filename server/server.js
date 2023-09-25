@@ -82,12 +82,12 @@ app.post('/choosePlant', authenticateJWT, async (req, res) => {
         if (results.length === 0) {
             return res.status(404).send('用戶未找到');
         }
-        const { userID: userId, role } = results[0]; // 修改此处，使用 userID 而不是 id
+        const { userID: userId, role } = results[0];
         if (role !== 'authorized_user') {
             return res.status(403).send('您沒有選擇植物的權限');
         }
 
-        const insertQuery = 'INSERT INTO user_plants (user_id, plant_id, planting_date) VALUES (?, ?, ?)';
+        const insertQuery = 'INSERT INTO user_plants (user_plant_id, user_id, plant_id, planting_date) VALUES (UUID(), ?, ?, ?)';
         const currentDate = new Date().toISOString().slice(0, 10);
         await db.query(insertQuery, [userId, plantId, currentDate]);
 
@@ -95,11 +95,8 @@ app.post('/choosePlant', authenticateJWT, async (req, res) => {
     } catch (err) {
         res.status(500).send('資料庫操作錯誤: ' + err.message);
     }
-    const userPlantId = uuidv4();
-    const insertQuery = 'INSERT INTO user_plants (user_plant_id, user_id, plant_id, planting_date) VALUES (?, ?, ?, ?)';
-    const currentDate = new Date().toISOString().slice(0, 10);
-    await db.query(insertQuery, [userPlantId, userId, plantId, currentDate]);
 });
+
 
 
 
