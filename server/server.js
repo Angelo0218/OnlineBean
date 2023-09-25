@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -94,6 +95,10 @@ app.post('/choosePlant', authenticateJWT, async (req, res) => {
     } catch (err) {
         res.status(500).send('資料庫操作錯誤: ' + err.message);
     }
+    const userPlantId = uuidv4();
+    const insertQuery = 'INSERT INTO user_plants (user_plant_id, user_id, plant_id, planting_date) VALUES (?, ?, ?, ?)';
+    const currentDate = new Date().toISOString().slice(0, 10);
+    await db.query(insertQuery, [userPlantId, userId, plantId, currentDate]);
 });
 
 
