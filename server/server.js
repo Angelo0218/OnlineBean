@@ -198,7 +198,7 @@ app.get('/api/currentUser', authenticateJWT, async (req, res) => {
 app.get('/api/userPlants', authenticateJWT, async (req, res) => {
     const username = req.user.username;
 
-    // 获取用户ID
+    // 獲取用戶ID
     const userIdQuery = 'SELECT userID FROM users WHERE username = ?';
     try {
         const [userResults] = await db.query(userIdQuery, [username]);
@@ -207,9 +207,9 @@ app.get('/api/userPlants', authenticateJWT, async (req, res) => {
         }
         const userId = userResults[0].userID;
 
-        // 根据用户ID查询其植物背包中的植物
+        // 根據用戶ID查詢其植物背包中的植物
         const userPlantsQuery = `
-            SELECT plants.plantID, plants.plantName, plants.plantDescription, plants.image
+            SELECT user_plants.user_plant_id, plants.plantID, plants.plantName, plants.plantDescription, plants.image
             FROM user_plants
             JOIN plants ON user_plants.plant_id = plants.plantID
             WHERE user_plants.user_id = ?`;
@@ -220,6 +220,7 @@ app.get('/api/userPlants', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫查詢錯誤: ' + err.message);
     }
 });
+
 app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
     const userId = req.user.userId; // 從JWT獲取用戶ID
     const plantId = req.query.plantId; // 從查詢參數獲取plantId
