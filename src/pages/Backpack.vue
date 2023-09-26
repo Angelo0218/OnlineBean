@@ -1,7 +1,7 @@
 <template>
     <main class="flex flex-wrap gap-x-8 gap-y-4 justify-center pt-20">
         <div class="alert flex justify-center">
-            <span class="text-3xl">植物背包</span>
+            <span class="text-3xl">🎒植物背包</span>
         </div>
         <div v-if="loading" class="flex justify-center w-full">
             <span class="loading loading-spinner text-success"></span>

@@ -28,9 +28,15 @@
                     
                 </ul>
             </div>
-            <div class="navbar-end">
-                <div class="btn-group" v-if="!isAuthenticated">
-                    <router-link to="/login" class="btn btn-active btn-primary ml-2 ">登入</router-link>
+            <div class="navbar-end mr-2">
+                <div v-if="!isAuthenticated">
+                  
+                    <router-link to="/register" class="btn btn-ghost ml-2 reg">
+                        <i class="fa-solid fa-user-plus"></i> 註冊新帳號
+                    </router-link>
+                    <router-link to="/login" class="btn btn-active btn-primary ml-2 ">
+                        <i class="fa-solid fa-lock"></i> 登入
+                    </router-link>
                 </div>
                 <div v-else>
                     <div @click="toggleDropdown" class="relative mr-3">
@@ -50,6 +56,7 @@
                     </div>
                 </div>
             </div>
+       
         </nav>
     </header>
 </template>
@@ -195,4 +202,18 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(-20px);
     opacity: 0;
-}</style>
+}@media (max-width: 768px) {
+  .btn {
+    font-size: 0.8rem;
+    padding: 8px;
+    margin: 2px;
+  }
+  .navbar-end {
+    flex-wrap: wrap;
+  }
+  .reg{
+    display: none;
+  }
+}
+
+</style>

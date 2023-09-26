@@ -27,7 +27,7 @@
   
   .content {
     text-align: center;
-    background: #ffffff;
+
     padding: 50px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px 0px #00000033;
@@ -40,13 +40,13 @@
   
   .title {
     font-size: 36px;
-    color: #333;
+    color: #fff;
     margin-top: 20px;
   }
   
   .description {
     font-size: 18px;
-    color: #666;
+    color: #fff;
     margin-top: 10px;
   }
   

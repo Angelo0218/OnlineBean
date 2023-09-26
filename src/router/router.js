@@ -32,7 +32,7 @@ import { useAuthStore } from '../store/auth.js';
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const apiUrl = import.meta.env.VITE_API_URL; // 使用 Vite 環境變量
-
+  console.log('Username:', authStore.username);
   // 檢查路由是否需要驗證
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // 檢查用戶是否已登錄
