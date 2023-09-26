@@ -43,7 +43,7 @@ export default {
             }
         });
         this.userPlants = response.data;
-        console.log(this.userPlants); 
+        // console.log(this.userPlants); 
     } catch (error) {
         console.error('Error fetching user plants:', error);
         this.loading = false;

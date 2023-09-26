@@ -251,7 +251,9 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
 app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) => {
     const username = req.user.username;
     const userPlantId = req.params.userPlantId;
-    
+    console.log(`UserId: ${userId}`);
+console.log('Plant Results:', plantResults);
+
     // 查詢用戶ID
     const userIdQuery = 'SELECT userID FROM users WHERE username = ?';
     try {

@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import NotFound from '../pages/NotFound.vue';
+import axios from 'axios';
+
 const routes = [
   { name: '首頁', path: '/', component: () => import('../pages/Home.vue') },
   { name: '註冊', path: '/register', component: () => import('../pages/Login/Register.vue') },
@@ -53,6 +55,7 @@ router.beforeEach(async (to, from, next) => {
         });
         next();
       } catch (error) {
+        console.error('錯誤:', error);
         // 如果後端返回錯誤，則重定向到 404 頁面
         next({ path: '/:catchAll(.*)' });
       }
