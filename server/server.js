@@ -251,33 +251,36 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
 app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) => {
     const username = req.user.username;
     const userPlantId = req.params.userPlantId;
-    console.log(`UserId: ${userId}`);
-console.log('Plant Results:', plantResults);
 
     // 查詢用戶ID
     const userIdQuery = 'SELECT userID FROM users WHERE username = ?';
     try {
-      const [userResults] = await db.query(userIdQuery, [username]);
-      if (userResults.length === 0) {
-        return res.status(404).send('用戶未找到');
-      }
-      const userId = userResults[0].userID;
-      
-      // 檢查 userPlantId 是否屬於該用戶
-      const checkUserPlantQuery = 'SELECT * FROM user_plants WHERE user_plant_id = ? AND user_id = ?';
-      const [plantResults] = await db.query(checkUserPlantQuery, [userPlantId, userId]);
-      
-      if (plantResults.length === 0) {
-        // userPlantId 不屬於該用戶
-        return res.status(403).send('無權訪問此植物');
-      }
-      
-      // userPlantId 屬於該用戶
-      res.status(200).send('訪問許可');
+        const [userResults] = await db.query(userIdQuery, [username]);
+        if (userResults.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+        const userId = userResults[0].userID;
+        
+        // 檢查 userPlantId 是否屬於該用戶
+        const checkUserPlantQuery = 'SELECT * FROM user_plants WHERE user_plant_id = ? AND user_id = ?';
+        const [plantResults] = await db.query(checkUserPlantQuery, [userPlantId, userId]);
+        
+        // 在此處打印 userId 和 plantResults
+        console.log(`UserId: ${userId}`);
+        console.log('Plant Results:', plantResults);
+
+        if (plantResults.length === 0) {
+            // userPlantId 不屬於該用戶
+            return res.status(403).send('無權訪問此植物');
+        }
+        
+        // userPlantId 屬於該用戶
+        res.status(200).send('訪問許可');
     } catch (err) {
-      res.status(500).send('資料庫查詢錯誤: ' + err.message);
+        res.status(500).send('資料庫查詢錯誤: ' + err.message);
     }
-  });
+});
+
 
 
 app.listen(port, () => {
