@@ -254,9 +254,8 @@ app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) =>
     console.log("Received ID:", userPlantId);
 
     // 逆操作以恢复原始的 userPlantId
-    userPlantId = userPlantId.substring(23) + "-" + userPlantId.substring(18, 23) + "-" + userPlantId.substring(13, 18) + "-" + userPlantId.substring(8, 13) + "-" + userPlantId.substring(0, 8);
+    userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(19, 23) + "-" + userPlantId.substring(14, 18) + "-" + userPlantId.substring(9, 13) + "-" + userPlantId.substring(0, 8);
     
-    // 打印逆操作后的 userPlantId
     console.log("Reversed ID:", userPlantId);
     // 查詢用戶ID
     const userIdQuery = 'SELECT userID FROM users WHERE username = ?';
