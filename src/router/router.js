@@ -27,8 +27,9 @@ const router = createRouter({
 })
 import { useAuthStore } from '../store/auth.js';
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+  const apiUrl = import.meta.env.VITE_API_URL; // 使用 Vite 環境變量
 
   // 檢查路由是否需要驗證
   if (to.matched.some(record => record.meta.requiresAuth)) {
@@ -37,16 +38,29 @@ router.beforeEach((to, from, next) => {
       // 如果用戶未登錄，則跳到登錄頁面
       next({
         path: '/login',
-        query: { redirect: to.fullPath } // 儲存訪問的頁面路徑，登錄後可以選擇跳轉回該頁面
+        query: { redirect: to.fullPath }
       });
     } else if (to.path === '/Add' && authStore.username !== 'Angelo0218') {
       // 如果用戶名不是Angelo0218
       next({ path: '/:catchAll(.*)' }); // 跳到 404 頁面
+    } else if (to.name === '線上養殖') {
+      // 如果是訪問 /online/:userPlantId，檢查 userPlantId 是否屬於該用戶
+      try {
+        const userPlantId = to.params.userPlantId;
+        // 使用 apiUrl 與後端溝通檢查 userPlantId
+        await axios.get(`${apiUrl}/api/checkUserPlant/${userPlantId}`, {
+          headers: { 'Authorization': `Bearer ${authStore.token}` }
+        });
+        next();
+      } catch (error) {
+        // 如果後端返回錯誤，則重定向到 404 頁面
+        next({ path: '/:catchAll(.*)' });
+      }
     } else {
       next(); // 繼續導航
     }
   } else {
-    next(); 
+    next();
   }
 });
 
