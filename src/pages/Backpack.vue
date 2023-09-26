@@ -57,12 +57,13 @@ export default {
         const router = useRouter();
 
         function selectPlant(userPlantId) {
+            console.log("Original ID:", userPlantId);
     // 把userPlantId變成分解為四個部分
     const parts = userPlantId.split('-');
     
     // 重新排列
     const reorderedId = parts[4]+parts[3] + parts[2] + parts[1] + parts[0];
-    
+    console.log("Reordered ID:", reorderedId);
     // 使用重新排列的 ID
     router.push({ path: `/online/${reorderedId}` });
 }

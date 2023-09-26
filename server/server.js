@@ -250,7 +250,9 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
 });
 app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) => {
     const username = req.user.username;
-    let userPlantId = req.params.userPlantId;
+    const userPlantId = req.params.userPlantId;
+    console.log("Received ID:", userPlantId);
+
 
     // 逆操作以恢復原始的 userPlantId
     userPlantId = userPlantId.substring(23) + "-" + userPlantId.substring(18, 23) + "-" + userPlantId.substring(13, 18) + "-" + userPlantId.substring(8, 13) + "-" + userPlantId.substring(0, 8);
