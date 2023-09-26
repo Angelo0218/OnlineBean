@@ -251,11 +251,11 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
 app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) => {
     const username = req.user.username;
     let userPlantId = req.params.userPlantId;
-    console.log("Received ID:", userPlantId);
+    // console.log("Received ID:", userPlantId);
 
 // 逆操作以恢復原始的 userPlantId
 userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24) + "-" + userPlantId.substring(16, 20) + "-" + userPlantId.substring(12, 16) + "-" + userPlantId.substring(0, 12);
-console.log("Reversed ID:", userPlantId);
+// console.log("Reversed ID:", userPlantId);
 
 
     // 查詢用戶ID
@@ -272,8 +272,8 @@ console.log("Reversed ID:", userPlantId);
         const [plantResults] = await db.query(checkUserPlantQuery, [userPlantId, userId]);
         
         // 在此處打印 userId 和 plantResults
-        console.log(`UserId: ${userId}`);
-        console.log('Plant Results:', plantResults);
+        // console.log(`UserId: ${userId}`);
+        // console.log('Plant Results:', plantResults);
 
         if (plantResults.length === 0) {
             // userPlantId 不屬於該用戶
