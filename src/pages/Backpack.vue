@@ -34,34 +34,36 @@ export default {
         };
     },
     async mounted() {
-        const authStore = useAuthStore();
-        try {
-            const response = await axios.get('http://angelo0218-server.ddns.net:3000/api/userPlants', {
-                headers: {
-                    'Authorization': `Bearer ${authStore.token}`
-                }
-            });
-            this.userPlants = response.data;
-            console.log(this.userPlants); // 在這裡打印 userPlants 數據
-        } catch (error) {
-            console.error('Error fetching user plants:', error);
-            this.loading = true;
-        } finally {
-            this.loading = false;
-        }
-    },
+    const authStore = useAuthStore();
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${apiUrl}/api/userPlants`, {
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`
+            }
+        });
+        this.userPlants = response.data;
+        console.log(this.userPlants); 
+    } catch (error) {
+        console.error('Error fetching user plants:', error);
+        this.loading = false;
+    } finally {
+        this.loading = false;
+    }
+},
+
 
     setup() {
         const router = useRouter();
 
         function selectPlant(userPlantId) {
-    // 將 userPlantId 分解為四個部分
+    // 把userPlantId變成分解為四個部分
     const parts = userPlantId.split('-');
     
-    // 重新排列各部分
+    // 重新排列
     const reorderedId = parts[4]+parts[3] + parts[2] + parts[1] + parts[0];
     
-    // 使用重新排列的 ID 構造 URL
+    // 使用重新排列的 ID
     router.push({ path: `/online/${reorderedId}` });
 }
 

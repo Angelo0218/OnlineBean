@@ -21,7 +21,7 @@
       </div>
 
       <button type="submit"
-      class="focus:outline-none text-white bg-green-900 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">增加</button>
+        class="focus:outline-none text-white bg-green-900 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">增加</button>
     </form>
   </div>
 </template>
@@ -38,17 +38,22 @@ export default {
   },
   methods: {
     async submitForm() {
+      if (!this.plantName || !this.plantDescription || !this.image) {
+          alert('請完整的填');
+          return;
+        }
       try {
         const token = localStorage.getItem('token');
-        // 發送帶有 JWT 令牌的請求
-        await axios.post('http://angelo0218-server.ddns.net:3000/addPlant', {
+        // 發送帶有 JWT 的請求
+        const apiUrl = import.meta.env.VITE_API_URL;
+        await axios.post(`${apiUrl}/addPlant`, {
           plantID: this.plantID,
           plantName: this.plantName,
           plantDescription: this.plantDescription,
           image: this.image
         }, {
           headers: {
-            'Authorization': 'Bearer ' + token  // 將令牌添加到請求標頭中
+            'Authorization': 'Bearer ' + token
           }
         });
 
@@ -67,4 +72,20 @@ export default {
   }
 }
 </script>
-  
+<style scoped>
+input, textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+}
+</style>

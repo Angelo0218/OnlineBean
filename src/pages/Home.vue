@@ -28,10 +28,10 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const showWelcome = ref(authStore.showWelcomeMessage);
-    const isUserLevelLoaded = ref(false); // 新增用來追踪用戶等級數據加載狀態的 ref
+    const isUserLevelLoaded = ref(false); 
 
     const welcomeMessage = computed(() => {
-      if (authStore.userLevel >= 90) {
+      if (authStore.role === 'admin') {
         return '尊敬的管理員 歡迎你！';
       } else {
         return '登入成功歡迎！';
@@ -39,8 +39,7 @@ export default {
     });
 
     onMounted(() => {
-      // 假設在某一點用戶等級數據會被加載
-      // 在數據加載完成後設置 isUserLevelLoaded 為 true
+
       isUserLevelLoaded.value = true;
 
       if (showWelcome.value) {

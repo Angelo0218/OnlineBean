@@ -35,11 +35,13 @@ export default {
     async mounted() {
         const authStore = useAuthStore();
         try {
-            const response = await axios.get('http://angelo0218-server.ddns.net:3000/api/plants', {
+            const apiUrl = import.meta.env.VITE_API_URL;
+            const response = await axios.get(`${apiUrl}/api/plants`, {
                 headers: {
                     'Authorization': `Bearer ${authStore.token}`
                 }
             });
+
             this.plants = response.data;
         } catch (error) {
             console.error('Error fetching plants:', error);

@@ -22,15 +22,15 @@
             <div class="navbar-center max-sm:hidden lg:flex">
                 <ul class="menu menu-horizontal px-1">
                     <li><router-link to="/">首頁</router-link></li>
-                    <li><router-link to="/plants" >植物商店</router-link></li>
-                        <li><router-link to="/Backpack" >植物背包</router-link></li>
-                    <li><router-Link to="/about">關於我們</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/plants" >植物商店</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/Backpack" >植物背包</router-link></li>
+                    <li><router-link to="/about">關於我們</router-link></li>
+                    
                 </ul>
             </div>
             <div class="navbar-end">
                 <div class="btn-group" v-if="!isAuthenticated">
-                    <router-link to="/register" class="btn btn-primary">註冊</router-link>
-                    <router-link to="/login" class="btn btn-ghost ml-2">登入</router-link>
+                    <router-link to="/login" class="btn btn-active btn-primary ml-2 ">登入</router-link>
                 </div>
                 <div v-else>
                     <div @click="toggleDropdown" class="relative mr-3">

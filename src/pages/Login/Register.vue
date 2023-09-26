@@ -43,8 +43,8 @@
                             <!-- 同意使用条例的复选框 -->
                             <div class="agree-terms">
                                 <input type="checkbox" id="agreeTerms" v-model="agreeTerms" @change="errorMessage = ''">
-                                <label for="agreeTerms" class="ml-2 text-gray-900">我已閱讀並同意<a href="#" class=" text-blue-700"
-                                        @click.prevent="viewTerms">使用條例</a></label>
+                                <label for="agreeTerms" class="ml-2 text-gray-900">我已閱讀並同意<a href="#" target="_blank"
+                                        class=" text-blue-700" @click.prevent="viewTerms">使用條例</a></label>
                             </div>
 
                             <!-- 注册按钮 -->
@@ -66,27 +66,26 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/auth.js';
 
 export default {
-  name: 'Register',
-  setup() {
-    const router = useRouter();
-    const username = ref('');
-    const email = ref('');
-    const password = ref('');
-    const errorMessage = ref('');
-    const agreeTerms = ref(false); // 新增的复选框模型
+    name: 'Register',
+    setup() {
+        const router = useRouter();
+        const username = ref('');
+        const email = ref('');
+        const password = ref('');
+        const errorMessage = ref('');
+        const agreeTerms = ref(false);
 
-    async function register() {
-      if (!agreeTerms.value) {
-        errorMessage.value = '您必須同意使用條例才能註冊';
-        return;
-      }
-    }
-    function viewTerms() {
-      router.push('/terms'); // 跳转到条款页面
-    }
+        async function register() {
+            if (!agreeTerms.value) {
+                errorMessage.value = '您必須同意使用條例才能註冊';
+                return;
+            }
+        }
+        function viewTerms() {
+            router.push('/terms');
+        }
         async function register() {
             try {
-                // 獲取表單字段的值
                 const usernameValue = username.value;
                 const emailValue = email.value;
                 const passwordValue = password.value;
@@ -98,11 +97,13 @@ export default {
                 }
 
                 // 發送註冊請求
-                const response = await axios.post('http://angelo0218-server.ddns.net:3000/register', {
+                const apiUrl = import.meta.env.VITE_API_URL;
+                const response = await axios.post(`${apiUrl}/register`, {
                     username: usernameValue,
                     email: emailValue,
                     password: passwordValue,
                 });
+
 
                 if (response.status === 200) {
                     const authStore = useAuthStore();
@@ -115,7 +116,7 @@ export default {
                 // 5秒後隱藏錯誤消息
                 setTimeout(() => {
                     errorMessage.value = '';
-                }, 2000); // 5000毫秒 = 5秒
+                }, 2000);
             }
 
         }
@@ -128,8 +129,8 @@ export default {
             password,
             register,
             errorMessage,
-            agreeTerms, // 传递复选框模型
-      viewTerms // 传递查看条款的函数
+            agreeTerms,
+            viewTerms
         };
     },
 };
@@ -189,8 +190,10 @@ label {
     border-radius: 8px;
     text-align: center;
 }
+
 .agree-terms {
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-}</style>
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+}
+</style>

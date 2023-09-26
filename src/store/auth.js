@@ -27,16 +27,19 @@ export const useAuthStore = defineStore({
     setRegistrationSuccess(value) {
       this.registrationSuccess = value;
     },
+    
     async login(identifier, password) {
       try {
-        const response = await axios.post('http://angelo0218-server.ddns.net:3000/login', { identifier, password });
+        const apiUrl = import.meta.env.VITE_API_URL;
+
+        const response = await axios.post(`${apiUrl}/login`, { identifier, password });
         if (response.status === 200) {
           this.token = response.data.token;
           localStorage.setItem('token', this.token);
           this.isAuthenticated = true;
           this.username = response.data.user.username;
           this.email = response.data.user.email;
-          this.role = response.data.user.role; // 正確更新 role
+          this.role = response.data.user.role; 
           this.creationDate = response.data.user.creationDate;
           this.showWelcomeMessage = true;
           router.push('/');
@@ -49,23 +52,26 @@ export const useAuthStore = defineStore({
     },
     async fetchCurrentUser() {
       if (this.token) {
-          try {
-              const response = await axios.get('http://angelo0218-server.ddns.net:3000/api/currentUser', {
-                  headers: {
-                      'Authorization': `Bearer ${this.token}`
-                  }
-              });
-              console.log(response.data);
-              this.username = response.data.username;
-              this.email = response.data.email;
-              this.role = response.data.role; // 正確更新 role
-              this.creationDate = response.data.creationDate;
-          } catch (error) {
-            console.error('Error fetching current user:', error.response || error);
-            this.logout();
-          }
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL;
+
+          const response = await axios.get(`${apiUrl}/api/currentUser`, {
+            headers: {
+              'Authorization': `Bearer ${this.token}`
+            }
+          });
+          console.log(response.data);
+          this.username = response.data.username;
+          this.email = response.data.email;
+          this.role = response.data.role;
+          this.creationDate = response.data.creationDate;
+        } catch (error) {
+          console.error('Error fetching current user:', error.response || error);
+          this.logout();
+        }
       }
     },
+    
     hideWelcomeMessage() {
       this.showWelcomeMessage = false;
     },

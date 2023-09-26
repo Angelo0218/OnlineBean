@@ -248,6 +248,31 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫操作錯誤: ' + err.message);
     }
 });
+app.get('/api/userPlant/:userPlantId', authenticateJWT, async (req, res) => {
+    const { userPlantId } = req.params;
+    const username = req.user.username;
+
+    try {
+        // 首先，查詢登入用戶的 userID
+        const [userResults] = await db.query('SELECT userID FROM users WHERE username = ?', [username]);
+        if (userResults.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+        const userId = userResults[0].userID;
+        
+        // 然後，檢查 user_plants 表格，確保 userPlantId 屬於該用戶
+        const [plantResults] = await db.query('SELECT * FROM user_plants WHERE user_plant_id = ? AND user_id = ?', [userPlantId, userId]);
+        if (plantResults.length === 0) {
+            return res.status(403).send('您無權訪問此植物');
+        }
+
+        // 如果檢查通過，則返回植物的詳細信息或進行其他操作
+        res.status(200).json(plantResults[0]);
+
+    } catch (err) {
+        res.status(500).send('資料庫操作錯誤: ' + err.message);
+    }
+});
 
 
 app.listen(port, () => {

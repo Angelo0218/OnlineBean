@@ -1,11 +1,10 @@
 <template>
-    
     <div class=" container " style="margin-top:80px;">
-        <router-link to="Backpack" class="btn btn-primary justify-center mb-3">
-
+        <router-link to="/Backpack" class="btn btn-primary justify-center mb-3">
             <i class="fa-solid fa-chevron-left"></i>
             <span>上一頁</span>
         </router-link>
+
         <div class="alert flex justify-center">
             <span class=" text-3xl">養殖植物</span>
         </div>
@@ -26,8 +25,7 @@ export default {
     setup() {
         const route = useRoute();
         const plantId = route.query.plantId;
-        
-        // 這裡您可以使用 plantId 來獲取和顯示相關的植物信息
+
     }
 }
 
