@@ -36,15 +36,16 @@ import { useAuthStore } from '../store/auth.js';
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+  
   if (authStore.isAuthenticated) {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      await axios.get(`${apiUrl}/api/checkTokenValidity`, {
-        headers: { 'Authorization': `Bearer ${authStore.token}` }
-      });
-      // 如果 token 有效，可以顯示歡迎消息
-      authStore.showWelcomeMessage = !authStore.welcomeMessageShown;
+      // ... 其他代码
+      // 检查 justLoggedIn 状态，避免覆盖 showWelcomeMessage
+      if (!authStore.justLoggedIn) {
+        authStore.showWelcomeMessage = !authStore.welcomeMessageShown;
+      }
       authStore.welcomeMessageShown = true;
+      authStore.justLoggedIn = false; // 重置 justLoggedIn 状态
     } catch (error) {
       // 如果 token 無效，登出用戶並重定向到登錄頁面
       console.error('Token is invalid:', error);

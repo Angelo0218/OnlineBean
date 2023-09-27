@@ -8,6 +8,7 @@ export const useAuthStore = defineStore({
     registrationSuccess: false,
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
+    justLoggedIn: false,
     username: null,
     email: null,
     role: null, // 添加 role 狀態
@@ -31,7 +32,7 @@ export const useAuthStore = defineStore({
     async login(identifier, password) {
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-
+    
         const response = await axios.post(`${apiUrl}/login`, { identifier, password });
         if (response.status === 200) {
           this.token = response.data.token;
@@ -42,7 +43,11 @@ export const useAuthStore = defineStore({
           this.role = response.data.user.role; 
           this.creationDate = response.data.user.creationDate;
           this.showWelcomeMessage = true;
-          router.push('/');
+          this.justLoggedIn = true; 
+          // 使用 setTimeout 来延迟跳转
+          setTimeout(() => {
+            router.push('/');
+          }, 0);
         } else {
           throw new Error(response.data || '登入成功');
         }
@@ -50,6 +55,8 @@ export const useAuthStore = defineStore({
         throw new Error(error.response.data || error.message);
       }
     },
+    
+    
     async fetchCurrentUser() {
       if (this.token) {
         try {

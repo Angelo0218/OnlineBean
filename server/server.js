@@ -236,11 +236,11 @@ app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
         // 如果用戶有權訪問，則繼續處理請求，獲取植物詳細信息並返回給用戶
         const getPlantDetailsQuery = 'SELECT * FROM plants WHERE plantID = ?';
         const [plantDetailsResults] = await db.query(getPlantDetailsQuery, [plantId]);
-        
+
         if (plantDetailsResults.length === 0) {
             return res.status(404).send('植物未找到');
         }
-        
+
         // 返回植物詳細信息
         res.status(200).json(plantDetailsResults[0]);
 
@@ -253,9 +253,9 @@ app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) =>
     let userPlantId = req.params.userPlantId;
     // console.log("Received ID:", userPlantId);
 
-// 逆操作以恢復原始的 userPlantId
-userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24) + "-" + userPlantId.substring(16, 20) + "-" + userPlantId.substring(12, 16) + "-" + userPlantId.substring(0, 12);
-// console.log("Reversed ID:", userPlantId);
+    // 逆操作以恢復原始的 userPlantId
+    userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24) + "-" + userPlantId.substring(16, 20) + "-" + userPlantId.substring(12, 16) + "-" + userPlantId.substring(0, 12);
+    // console.log("Reversed ID:", userPlantId);
 
 
     // 查詢用戶ID
@@ -266,11 +266,11 @@ userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24
             return res.status(404).send('用戶未找到');
         }
         const userId = userResults[0].userID;
-        
+
         // 檢查 userPlantId 是否屬於該用戶
         const checkUserPlantQuery = 'SELECT * FROM user_plants WHERE user_plant_id = ? AND user_id = ?';
         const [plantResults] = await db.query(checkUserPlantQuery, [userPlantId, userId]);
-        
+
         // 在此處打印 userId 和 plantResults
         // console.log(`UserId: ${userId}`);
         // console.log('Plant Results:', plantResults);
@@ -279,7 +279,7 @@ userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24
             // userPlantId 不屬於該用戶
             return res.status(403).send('無權訪問此植物');
         }
-        
+
         // userPlantId 屬於該用戶
         res.status(200).send('訪問許可');
     } catch (err) {
@@ -289,6 +289,43 @@ userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24
 app.get('/api/checkTokenValidity', authenticateJWT, (req, res) => {
     // token驗證
     res.status(200).send('Token is valid');
+});
+app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
+    const username = req.user.username;
+    const { newPassword, email, password } = req.body;
+
+    try {
+        // 首先檢查用戶輸入的當前密碼是否正確
+        const [userResults] = await db.query('SELECT password, lastUpdateDate FROM users WHERE username = ?', [username]);
+        if (userResults.length === 0) {
+            return res.status(404).send('用戶未找到');
+        }
+
+        const user = userResults[0];
+        const passwordIsValid = await bcrypt.compare(password, user.password);
+        if (!passwordIsValid) {
+            return res.status(401).send('當前密碼錯誤');
+        }
+
+        // 檢查距離上次更新是否已過七天
+        const lastUpdateDate = new Date(user.lastUpdateDate);
+        const currentDate = new Date();
+        const diffTime = Math.abs(currentDate - lastUpdateDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 7) {
+            return res.status(403).send('七天內不能重複修改資料');
+        }
+
+        // 更新用戶信息
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.query('UPDATE users SET password = ?, email = ?, lastUpdateDate = ? WHERE username = ?', [hashedPassword, email, currentDate, username]);
+
+        res.status(200).send('用戶信息更新成功！');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('資料庫操作錯誤');
+    }
 });
 
 

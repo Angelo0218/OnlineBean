@@ -10,18 +10,19 @@
       </div>
     </div>
     <transition name="fade">
-      <div v-if="showWelcome && isAuthenticated"
+      <div v-if="showWelcome && isAuthenticated && isUserLevelLoaded"
         class="bg-green-200 text-amber-800  fade2 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
         {{ welcomeMessage }}
       </div>
     </transition>
+
+
+
   </div>
 </template>
-
 <script>
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '../store/auth.js';
-
 
 export default {
   setup() {
@@ -38,10 +39,6 @@ export default {
     });
 
     onMounted(() => {
-      // 檢查是否存在有效的 token，如果存在，則不顯示歡迎消息
-      if (localStorage.getItem('token')) {
-        authStore.showWelcomeMessage = false;
-      }
 
       isUserLevelLoaded.value = true;
 
@@ -64,7 +61,6 @@ export default {
     };
   }
 }
-
 </script>
 
 
