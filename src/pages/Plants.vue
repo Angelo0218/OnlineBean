@@ -14,7 +14,7 @@
                 <span class="card-title justify-center text-2xl">{{ plant.plantName }}</span>
                 <span class="card-title justify-center text-base">{{ plant.plantDescription }}</span>
                 <div class="card-actions justify-center">
-                    <button @click="choosePlant(plant.plantID)" class="btn btn-primary">選這個</button>
+                    <button @click="choosePlant(plant.plantID)" class="btn btn-primary">購買</button>
                 </div>
             </div>
         </div>
@@ -54,13 +54,15 @@ export default {
             const authStore = useAuthStore();
             try {
                 const apiUrl = import.meta.env.VITE_API_URL;
-                await axios.post(`${apiUrl}/api/choosePlant`, {
+                await axios.post(`${apiUrl}/choosePlant`, {
                     plantId
                 }, {
                     headers: {
                         'Authorization': `Bearer ${authStore.token}`
                     }
                 });
+
+
                 alert('植物選擇成功！');
             } catch (error) {
                 console.error('Error in /choosePlant:', error); // 這裡應該使用 error 而不是 err

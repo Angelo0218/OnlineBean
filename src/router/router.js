@@ -13,7 +13,12 @@ const routes = [
     component: () => import('../pages/Online.vue'),
     meta: { requiresAuth: true }
   },
-
+  {
+    name: '神秘植物',
+    path: '/online666',
+    component: () => import('../pages/Online666.vue'),
+    meta: { requiresAuth: true }
+  },
   { name: '選擇植物', path: '/Plants', component: () => import('../pages/Plants.vue'), meta: { requiresAuth: true } },
   { name: '植物背包', path: '/Backpack', component: () => import('../pages/Backpack.vue'), meta: { requiresAuth: true } },
   { name: '增加', path: '/Add', component: () => import('../pages/root/Add.vue') },

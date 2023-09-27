@@ -81,7 +81,7 @@ export default {
 }
 .fade2{
   position: relative;
-  top: 35vh;
+  bottom: -30%;
 
 }
 .fade-enter-active,
