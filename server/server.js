@@ -292,7 +292,7 @@ app.get('/api/checkTokenValidity', authenticateJWT, (req, res) => {
 });
 app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
     const username = req.user.username;
-    const { newPassword, email, password } = req.body;
+    const { newPassword, newUsername, email, password } = req.body;
 
     try {
         // 首先檢查用戶輸入的當前密碼是否正確
@@ -319,7 +319,7 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
 
         // 更新用戶信息
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await db.query('UPDATE users SET password = ?, email = ?, lastUpdateDate = ? WHERE username = ?', [hashedPassword, email, currentDate, username]);
+        await db.query('UPDATE users SET username = ?, password = ?, email = ?, lastUpdateDate = ? WHERE username = ?', [newUsername, hashedPassword, email, currentDate, username]);
 
         res.status(200).send('用戶信息更新成功！');
     } catch (err) {
@@ -327,6 +327,7 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
         res.status(500).send('資料庫操作錯誤');
     }
 });
+
 
 
 

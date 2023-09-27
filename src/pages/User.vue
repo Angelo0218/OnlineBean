@@ -25,8 +25,13 @@
                 </div>
                 <div v-if="editing" class="info">
                     <span class="icon">&#128274;</span>
-                    <span class="label">密碼:</span>
-                    <input v-model="password" placeholder="輸入密碼以確認更改" type="password" />
+                    <span class="label">當前密碼:</span>
+                    <input v-model="password" placeholder="輸入當前密碼以確認更改" type="password" />
+                </div>
+                <div v-if="editing" class="info">
+                    <span class="icon">&#128274;</span>
+                    <span class="label">新密碼:</span>
+                    <input v-model="newPassword" placeholder="輸入新密碼" type="password" />
                 </div>
                 <div class="info" v-if="creationDate">
                     <span class="icon">🖋️</span>
@@ -44,7 +49,8 @@
 <script>
 import { ref, watchEffect, computed } from 'vue';
 import { useAuthStore } from '../store/auth.js';
-import axios from 'axios'; 
+import axios from 'axios';
+
 export default {
     setup() {
         const apiUrl = import.meta.env.VITE_API_URL;
@@ -57,6 +63,7 @@ export default {
         const newUsername = ref(authStore.username);
         const newEmail = ref(authStore.email);
         const password = ref('');
+        const newPassword = ref('');
 
         watchEffect(() => {
             username.value = authStore.username;
@@ -92,6 +99,7 @@ export default {
             }
             return '';
         });
+
         const updateUserInfo = async () => {
             try {
                 // 檢查用戶輸入
@@ -104,22 +112,25 @@ export default {
                 if (!newPassword.value) {
                     throw new Error('請輸入新密碼');
                 }
+                if (!newUsername.value) {
+                    throw new Error('請輸入新用戶名');
+                }
                 
                 // 發送POST請求到後端更新用戶信息
                 const response = await axios.post(`${apiUrl}/updateUserInfo`, {
                     password: password.value,
                     email: newEmail.value,
                     newPassword: newPassword.value,
+                    newUsername: newUsername.value,
                 });
 
                 // 檢查響應並給出適當的提示
                 if (response.status === 200) {
-                    console.log('用戶信息更新成功！');
-                    // 在這裡，您可以添加其他處理，例如顯示一個成功消息，重定向到其他頁面等。
+                    alert('用戶信息更新成功！');
+                    editing.value = false; // 關閉編輯模式
                 }
             } catch (error) {
-                console.error('更新用戶信息出錯', error);
-                // 在這裡，您可以添加錯誤處理，例如顯示一個錯誤消息給用戶。
+                alert('更新用戶信息出錯: ' + error.message);
             }
         };
 
@@ -134,6 +145,7 @@ export default {
             newUsername,
             newEmail,
             password,
+            newPassword,
             updateUserInfo,
         };
     }
@@ -141,48 +153,51 @@ export default {
 </script>
 
 <style scoped>
+/* 在這裡加入您的樣式 */
 .container {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-
 }
 
 .user-card {
-    background-color: #ffffff; /* 設定卡片背景顏色 */
-    color: #333333; /* 設定文字顏色 */
-    border-radius: 15px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1); /* 調整陰影效果 */
-    max-width: 400px;
+    background-color: #272626;
+    padding: 20px;
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
     width: 100%;
-    overflow: hidden;
-    transition: transform 0.3s ease-in-out;
-    padding: 20px; /* 增加內間距 */
 }
 
 .header {
     display: flex;
-    justify-content: space-between; /* 使標題和編輯按鈕分開 */
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px; /* 增加下間距 */
 }
 
 .title {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 600;
 }
 
 .edit-button {
-    background-color: #48bb78; /* 設定按鈕背景顏色 */
-    color: #ffffff; /* 設定按鈕文字顏色 */
-    padding: 8px 16px;
-    border-radius: 8px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .edit-button:hover {
-    background-color: #38a169; /* 設定按鈕懸停背景顏色 */
+    background-color: #0056b3;
+}
+
+.content {
+    margin-top: 20px;
 }
 
 .info {
@@ -192,41 +207,43 @@ export default {
 }
 
 .icon {
-    font-size: 24px;
+    font-size: 20px;
     margin-right: 10px;
-    color: #48bb78;
 }
 
 .label {
     font-weight: 600;
+    min-width: 100px;
 }
 
-.value, input {
+.value {
     font-weight: 400;
-    margin-left: 5px;
 }
 
 input {
-    padding: 5px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    width: 100%;
 }
 
 .action-buttons {
+    margin-top: 20px;
     display: flex;
     justify-content: flex-end;
-    margin-top: 20px; /* 增加上間距 */
 }
 
 .save-button {
-    background-color: #48bb78;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 8px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .save-button:hover {
-    background-color: #38a169;
+    background-color: #218838;
 }
 </style>
