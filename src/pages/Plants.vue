@@ -53,7 +53,8 @@ export default {
         async choosePlant(plantId) {
             const authStore = useAuthStore();
             try {
-                await axios.post('http://angelo0218-server.ddns.net:3000/choosePlant', {
+                const apiUrl = import.meta.env.VITE_API_URL;
+                await axios.post(`${apiUrl}/api/choosePlant`, {
                     plantId
                 }, {
                     headers: {
