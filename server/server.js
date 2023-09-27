@@ -293,7 +293,6 @@ app.get('/api/checkTokenValidity', authenticateJWT, (req, res) => {
 app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
     const username = req.user.username;
     const { newPassword, newUsername, email, password } = req.body;
-
     try {
         // 首先檢查用戶輸入的當前密碼是否正確
         const [userResults] = await db.query('SELECT password, lastUpdateDate FROM users WHERE username = ?', [username]);
@@ -320,7 +319,9 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
         // 更新用戶信息
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await db.query('UPDATE users SET username = ?, password = ?, email = ?, lastUpdateDate = ? WHERE username = ?', [newUsername, hashedPassword, email, currentDate, username]);
-
+        // 更新用戶信息成功後，生成新的 token
+        const newUser = { username: newUsername || username }; // 新的用戶信息
+        const newToken = jwt.sign(newUser, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).send('用戶信息更新成功！');
     } catch (err) {
         console.error(err);

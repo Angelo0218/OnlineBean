@@ -72,6 +72,7 @@ export default {
             creationDate.value = authStore.creationDate;
         });
 
+
         const roleInChinese = computed(() => {
             switch (role.value) {
                 case 'admin':
@@ -115,7 +116,7 @@ export default {
                 if (!newUsername.value) {
                     throw new Error('請輸入新用戶名');
                 }
-                
+
                 // 發送POST請求到後端更新用戶信息
                 const response = await axios.post(`${apiUrl}/updateUserInfo`, {
                     password: password.value,
@@ -127,13 +128,18 @@ export default {
                 // 檢查響應並給出適當的提示
                 if (response.status === 200) {
                     alert('用戶信息更新成功！');
-                    editing.value = false; // 關閉編輯模式
+                    editing.value = false;
+                    authStore.username = newUsername.value;
+                    authStore.email = newEmail.value;
+
+                    // 更新本地存儲的 token
+                    const newToken = response.data.token;
+                    localStorage.setItem('token', newToken);
                 }
             } catch (error) {
                 alert('更新用戶信息出錯: ' + error.message);
             }
         };
-
         return {
             username,
             email,
