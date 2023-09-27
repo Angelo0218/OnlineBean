@@ -50,6 +50,7 @@
 import { ref, watchEffect, computed } from 'vue';
 import { useAuthStore } from '../store/auth.js';
 import axios from 'axios';
+import router from '../router/router';
 
 export default {
     setup() {
@@ -64,7 +65,7 @@ export default {
         const newEmail = ref(authStore.email);
         const password = ref('');
         const newPassword = ref('');
-
+        const { logout } = useAuthStore();
         watchEffect(() => {
             username.value = authStore.username;
             email.value = authStore.email;
@@ -126,20 +127,20 @@ export default {
                 });
 
                 // 檢查響應並給出適當的提示
+                // 检查响应并给出适当的提示
                 if (response.status === 200) {
-                    alert('用戶信息更新成功！');
-                    editing.value = false;
-                    authStore.username = newUsername.value;
-                    authStore.email = newEmail.value;
+                    alert('用户信息更新成功！');
+                    editing.value = false; // 关闭编辑模式
 
-                    // 更新本地存儲的 token
-                    const newToken = response.data.token;
-                    localStorage.setItem('token', newToken);
+                    // 登出和页面跳转应在异步操作完成后执行
+                    await logout(); // 使用 await 确保 logout 完成
+                    router.push('/login');
                 }
             } catch (error) {
-                alert('更新用戶信息出錯: ' + error.message);
+                alert('更新用户信息出错: ' + error.message);
             }
         };
+
         return {
             username,
             email,
