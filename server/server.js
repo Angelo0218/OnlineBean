@@ -286,6 +286,10 @@ userPlantId = userPlantId.substring(24, 36) + "-" + userPlantId.substring(20, 24
         res.status(500).send('資料庫查詢錯誤: ' + err.message);
     }
 });
+app.get('/api/checkTokenValidity', authenticateJWT, (req, res) => {
+    // token驗證
+    res.status(200).send('Token is valid');
+});
 
 
 

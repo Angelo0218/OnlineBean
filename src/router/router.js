@@ -24,7 +24,7 @@ const routes = [
   { name: '增加', path: '/Add', component: () => import('../pages/root/Add.vue') },
   { name: '用戶', path: '/User', component: () => import('../pages/User.vue'), meta: { requiresAuth: true } },
   { name: '使用條例', path: '/Terms', component: () => import('../pages/Terms.vue'), },
-  { path: '/:catchAll(.*)', component: NotFound } 
+  { path: '/:catchAll(.*)', component: NotFound }
 ]
 
 
@@ -36,6 +36,26 @@ import { useAuthStore } from '../store/auth.js';
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+  if (authStore.isAuthenticated) {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      await axios.get(`${apiUrl}/api/checkTokenValidity`, {
+        headers: { 'Authorization': `Bearer ${authStore.token}` }
+      });
+      // 如果 token 有效，可以顯示歡迎消息
+      authStore.showWelcomeMessage = !authStore.welcomeMessageShown;
+      authStore.welcomeMessageShown = true;
+    } catch (error) {
+      // 如果 token 無效，登出用戶並重定向到登錄頁面
+      console.error('Token is invalid:', error);
+      authStore.logout();
+      next({ path: '/login' });
+    }
+  } else {
+    // 如果用戶未認證，確保不顯示歡迎消息
+    authStore.showWelcomeMessage = false;
+  }
+
   const apiUrl = import.meta.env.VITE_API_URL; // 使用 Vite 環境變量
   console.log('Username:', authStore.username);
   // 檢查路由是否需要驗證
