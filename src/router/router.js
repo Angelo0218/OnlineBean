@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import NotFound from '../pages/NotFound.vue';
+import NotFound from '../pages/404/NotFound.vue';
 import axios from 'axios';
 
 const routes = [
@@ -7,23 +7,23 @@ const routes = [
   { name: '註冊', path: '/register', component: () => import('../pages/Login/Register.vue') },
   { name: '登入', path: '/login', component: () => import('../pages/Login/Login.vue') },
   { name: '關於我們', path: '/about', component: () => import('../pages/About.vue') },
+  { name: '選擇植物', path: '/Plants', component: () => import('../pages/PlantsShop.vue'), meta: { requiresAuth: true } },
+  { name: '植物背包', path: '/Backpack', component: () => import('../pages/Backpack.vue'), meta: { requiresAuth: true } },
   {
     name: '線上養殖',
     path: '/online/:userPlantId',
-    component: () => import('../pages/Online.vue'),
+    component: () => import('../pages/ChoosePlant/Online.vue'),
     meta: { requiresAuth: true }
   },
   {
     name: '神秘植物',
     path: '/online666',
-    component: () => import('../pages/Online666.vue'),
+    component: () => import('../pages/ChoosePlant/Online666.vue'),
     meta: { requiresAuth: true }
   },
-  { name: '選擇植物', path: '/Plants', component: () => import('../pages/Plants.vue'), meta: { requiresAuth: true } },
-  { name: '植物背包', path: '/Backpack', component: () => import('../pages/Backpack.vue'), meta: { requiresAuth: true } },
+ 
   { name: '增加', path: '/Add', component: () => import('../pages/root/Add.vue') },
-  { name: '用戶', path: '/User', component: () => import('../pages/User.vue'), meta: { requiresAuth: true } },
-  { name: '使用條例', path: '/Terms', component: () => import('../pages/Terms.vue'), },
+  { name: '使用條例', path: '/Terms', component: () => import('../pages/User/Terms.vue'), },
   { path: '/:catchAll(.*)', component: NotFound }
 ]
 

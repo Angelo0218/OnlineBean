@@ -1,14 +1,20 @@
 <template>
   <div class="hero min-h-screen ">
-    <div class="hero-content flex-col sm:flex-row-reverse">
-      <img src="../assets/tree.png" class="treeimg rounded-lg " />
+    <div>
+      <div class="hero-content flex-col sm:flex-row-reverse">
+        <img src="../assets/tree.png" class="treeimg rounded-lg " />
 
-      <div>
-        <h1 class="text-5xl font-bold ">線上養殖</h1>
-        <p class="py-6">「線上養殖，無限可能，輕鬆開展！」</p>
-        <router-link class="btn btn-lg btn-active btn-accent max-sm:w-5/6 max-sm:ml-5" to="/Backpack">立即養殖</router-link>
+        <div>
+          <h1 class="text-5xl font-bold ">線上養殖</h1>
+          <p class="py-6">「線上養殖，無限可能，輕鬆開展！」</p>
+          <router-link class="btn btn-lg btn-active btn-accent max-sm:w-5/6 max-sm:ml-5" to="/Backpack">立即養殖</router-link>
+        </div>
       </div>
     </div>
+    <div>
+     
+    </div>
+
     <transition name="fade">
       <div v-if="showWelcome && isAuthenticated && isUserLevelLoaded"
         class="bg-green-200 text-amber-800  fade2 font-extrabold p-4 rounded-xl shadow-md transition-transform duration-300 transform hover:scale-105">
@@ -28,7 +34,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const showWelcome = ref(authStore.showWelcomeMessage);
-    const isUserLevelLoaded = ref(false); 
+    const isUserLevelLoaded = ref(false);
 
     const welcomeMessage = computed(() => {
       if (authStore.role === 'admin') {
@@ -79,11 +85,25 @@ export default {
 
 
 }
-.fade2{
+
+@media screen and (max-width: 640px) {
+
+  h1,
+  p {
+    text-align: center;
+  }
+
+  .treeimg {
+    width: 100%;
+  }
+}
+
+.fade2 {
   position: relative;
   bottom: -30%;
 
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
@@ -101,7 +121,6 @@ export default {
   width: 9rem;
 
 }
-
 </style>
 
 

@@ -14,7 +14,7 @@
                         class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                         <li><router-link to="/" class="menu-item">首頁</router-link></li>
                         <li><router-link to="/plants" class="menu-item">植物商店</router-link></li>
-                        <li><router-link to="/Backpack" class="menu-item">植物背包</router-link></li>
+                        <li><router-link to="/Backpack" class="menu-item">我的植物</router-link></li>
                         <li><router-link to="/about" class="menu-item">關於我們</router-link></li>
                     </ul>
                 </div>
@@ -23,7 +23,7 @@
                 <ul class="menu menu-horizontal px-1">
                     <li><router-link to="/">首頁</router-link></li>
                     <li v-if="isAuthenticated"><router-link to="/plants" >植物商店</router-link></li>
-                    <li v-if="isAuthenticated"><router-link to="/Backpack" >植物背包</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/Backpack" >我的植物</router-link></li>
                     <li><router-link to="/about">關於我們</router-link></li>
                     
                 </ul>
