@@ -48,9 +48,9 @@
 
 <script>
 import { ref, watchEffect, computed } from 'vue';
-import { useAuthStore } from '../store/auth.js';
+import { useAuthStore } from '../../store/auth.js';
 import axios from 'axios';
-import router from '../router/router';
+import router from '../../router/router';
 
 export default {
     setup() {

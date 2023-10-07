@@ -6,7 +6,7 @@
 
         <div>
           <h1 class="text-5xl font-bold ">線上養殖</h1>
-          <p class="py-6">「線上養殖，無限可能，輕鬆開展e！」</p>
+          <p class="py-6">「線上養殖，無限可能，輕鬆開展！」</p>
           <router-link class="btn btn-lg btn-active btn-accent max-sm:w-5/6 max-sm:ml-5" to="/Backpack">立即養殖</router-link>
         </div>
       </div>

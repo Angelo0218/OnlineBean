@@ -5,17 +5,22 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-
+import https from 'https';
+import fs from 'fs';
+import jose from 'node-jose';
 
 dotenv.config();
 
 const app = express();
-const port = 3000;
 const secret = process.env.JWT_SECRET;
 const dbPassword = process.env.DB_PASSWORD;
 const DB_USER = process.env.DB_USER;
 const DB_IP = process.env.DB_IP;
 const DB_DATABASE = process.env.DB_DATABASE;
+const options = {
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+    key: fs.readFileSync(process.env.SSL_KEY_PATH)
+};
 
 app.use(cors());
 app.use(express.json());
@@ -25,6 +30,26 @@ const limiter = rateLimit({
     max: 100,
     message: "太多請求了，請稍後再試。"
 });
+
+let keys;  // 將keys變數宣告移到文件頂部
+
+async function generateKeyPair() {
+    const keystore = jose.JWK.createKeyStore();
+    const key = await keystore.generate('RSA', 2048, {
+        alg: 'RSA-OAEP-256',
+        use: 'enc'
+    });
+    fs.writeFileSync('keys.json', JSON.stringify(key.toJSON(true)));
+}
+
+// 檢查keys.json是否存在
+if (!fs.existsSync('keys.json')) {
+    generateKeyPair().then(() => {
+        keys = JSON.parse(fs.readFileSync('keys.json', 'utf8'));  // 賦值給keys變數
+    });
+} else {
+    keys = JSON.parse(fs.readFileSync('keys.json', 'utf8'));  // 賦值給keys變數
+}
 
 app.use('/login', limiter);
 app.use('/register', limiter);
@@ -36,7 +61,19 @@ const db = createPool({
     database: DB_DATABASE
 });
 
-function authenticateJWT(req, res, next) {
+// JWT加密
+async function encryptJWT(payload) {
+    const buffer = Buffer.from(JSON.stringify(payload), 'utf8');
+    return await jose.JWE.createEncrypt({ format: 'compact' }, keys).update(buffer).final();
+}
+
+// JWT解密
+async function decryptJWT(token) {
+    return await jose.JWE.createDecrypt(keys).decrypt(token);
+}
+
+
+async function authenticateJWT(req, res, next) {
     const authHeader = req.header('Authorization');
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -44,13 +81,14 @@ function authenticateJWT(req, res, next) {
         return res.status(401).send('Access Denied');
     }
 
-    jwt.verify(token, secret, (err, user) => {
-        if (err) {
-            return res.status(403).send('Invalid token');
-        }
+    try {
+        const decrypted = await decryptJWT(token);
+        const user = JSON.parse(decrypted.plaintext.toString());
         req.user = user;
         next();
-    });
+    } catch (err) {
+        return res.status(403).send('Invalid token');
+    }
 }
 
 function authenticateSpecificUser(req, res, next) {
@@ -139,18 +177,7 @@ app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
     const query = 'SELECT username, password, email, role, creationDate FROM users WHERE username = ? OR email = ?';
     try {
-        const [results] = await db.query(query, [identifier, identifier]);
-        if (results.length === 0) {
-            return res.status(401).send('用戶名不存在');
-        }
-
-        const user = results[0];
-        const passwordIsValid = await bcrypt.compare(password, user.password);
-        if (!passwordIsValid) {
-            return res.status(401).send('密碼錯誤');
-        }
-
-        const token = jwt.sign({ username: user.username }, secret, { expiresIn: '1h' });
+        const token = await encryptJWT({ username: user.username }); // 使用加密函數
         res.status(200).json({
             message: '登入成功！',
             token: token,
@@ -332,7 +359,9 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
 
 
 
+const server = https.createServer(options, app);
 
-app.listen(port, () => {
-    console.log(`伺服器正在運行，地址：http://localhost:${port}`);
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log(`Server is running on https://localhost:${port}`);
 });

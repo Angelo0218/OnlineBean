@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="content">
-      <img src="/404.png" alt="404" class="image" />
+      <!-- <img src="/404.png" alt="404" class="image" /> -->
       <h1 class="title font-black">哎呀！頁面未找到</h1>
       <p class="description ">抱歉，您訪問的頁面不存在。</p>
       <router-link to="/" class="home-link">返回首頁</router-link>
@@ -21,7 +21,7 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  margin-top: 20vh;
+  margin-bottom: 30vh;
 
 }
 
