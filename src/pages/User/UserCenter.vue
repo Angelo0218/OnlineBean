@@ -89,7 +89,7 @@ export default {
             if (creationDate.value) {
                 const date = new Date(creationDate.value);
                 try {
-                    const formatted = date.toLocaleDateString('zh-CN', {
+                    const formatted = date.toLocaleDateString('zh-hant', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -104,21 +104,21 @@ export default {
 
         const updateUserInfo = async () => {
             try {
-                // 檢查用戶輸入
+                // 前端驗證
+                if (!newPassword.value || newPassword.value.length < 6) {
+                    throw new Error('新密碼至少需要6個字符');
+                }
+                if (!newEmail.value || !/^\S+@\S+\.\S+$/.test(newEmail.value)) {
+                    throw new Error('請輸入有效的電子郵件地址');
+                }
                 if (!password.value) {
                     throw new Error('請輸入當前密碼');
-                }
-                if (!newEmail.value) {
-                    throw new Error('請輸入新的電子郵件地址');
-                }
-                if (!newPassword.value) {
-                    throw new Error('請輸入新密碼');
                 }
                 if (!newUsername.value) {
                     throw new Error('請輸入新用戶名');
                 }
 
-                // 發送POST請求到後端更新用戶信息
+                // 發送POST請求到後端
                 const response = await axios.post(`${apiUrl}/updateUserInfo`, {
                     password: password.value,
                     email: newEmail.value,
@@ -127,19 +127,25 @@ export default {
                 });
 
                 // 檢查響應並給出適當的提示
-                // 检查响应并给出适当的提示
                 if (response.status === 200) {
-                    alert('用户信息更新成功！');
-                    editing.value = false; // 关闭编辑模式
-
-                    // 登出和页面跳转应在异步操作完成后执行
-                    await logout(); // 使用 await 确保 logout 完成
+                    alert('用戶信息更新成功！');
+                    editing.value = false; // 關閉編輯模式
+                    await logout(); // 登出
                     router.push('/login');
                 }
             } catch (error) {
-                alert('更新用户信息出错: ' + error.message);
+                // 處理來自後端的錯誤響應
+                if (error.response) {
+                    // 從後端獲取錯誤信息
+                    const errorMessage = error.response.data || '更新用戶信息時發生未知錯誤';
+                    alert(`錯誤: ${errorMessage}`);
+                } else {
+                    // 處理其他錯誤（如網路問題或前端驗證錯誤）
+                    alert(`錯誤: ${error.message}`);
+                }
             }
         };
+
 
         return {
             username,

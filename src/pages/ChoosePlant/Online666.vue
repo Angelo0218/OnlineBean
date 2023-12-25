@@ -52,7 +52,7 @@ export default {
 
                     // 檢查當前植物是否是 "神秘的植物"
                     if (currentPlant.plantName === '神秘的植物') {
-                      
+
                         const randomNum = Math.random();
                         if (randomNum < 0.05) {
                             currentPlantImage.value = "/test/plant666.png";
@@ -69,12 +69,12 @@ export default {
 
             if (imageIndex === 10) {
                 const randomNum = Math.random();
-               
+
                 if (randomNum < 0.1) {
 
                     alert('恭喜中獎')
                     return "/test/plant666.png";
-                  
+
                 }
             }
 
