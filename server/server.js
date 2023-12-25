@@ -5,9 +5,7 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import https from 'https';
 import fs from 'fs';
-import jose from 'node-jose';
 
 dotenv.config();
 
@@ -17,10 +15,6 @@ const dbPassword = process.env.DB_PASSWORD;
 const DB_USER = process.env.DB_USER;
 const DB_IP = process.env.DB_IP;
 const DB_DATABASE = process.env.DB_DATABASE;
-const options = {
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH),
-    key: fs.readFileSync(process.env.SSL_KEY_PATH)
-};
 
 app.use(cors());
 app.use(express.json());
@@ -31,47 +25,30 @@ const limiter = rateLimit({
     message: "太多請求了，請稍後再試。"
 });
 
-let keys;  // 將keys變數宣告移到文件頂部
-
-async function generateKeyPair() {
-    const keystore = jose.JWK.createKeyStore();
-    const key = await keystore.generate('RSA', 2048, {
-        alg: 'RSA-OAEP-256',
-        use: 'enc'
-    });
-    fs.writeFileSync('keys.json', JSON.stringify(key.toJSON(true)));
-}
-
-// 檢查keys.json是否存在
-if (!fs.existsSync('keys.json')) {
-    generateKeyPair().then(() => {
-        keys = JSON.parse(fs.readFileSync('keys.json', 'utf8'));  // 賦值給keys變數
-    });
-} else {
-    keys = JSON.parse(fs.readFileSync('keys.json', 'utf8'));  // 賦值給keys變數
-}
-
 app.use('/login', limiter);
 app.use('/register', limiter);
 
 const db = createPool({
     host: DB_IP,
+    port: 3306,
     user: DB_USER,
     password: dbPassword,
     database: DB_DATABASE
 });
 
-// JWT加密
-async function encryptJWT(payload) {
-    const buffer = Buffer.from(JSON.stringify(payload), 'utf8');
-    return await jose.JWE.createEncrypt({ format: 'compact' }, keys).update(buffer).final();
+// JWT 加密
+function encryptJWT(payload) {
+    return jwt.sign(payload, secret, { expiresIn: '1h' });
 }
 
-// JWT解密
-async function decryptJWT(token) {
-    return await jose.JWE.createDecrypt(keys).decrypt(token);
+// JWT 解密
+function decryptJWT(token) {
+    try {
+        return jwt.verify(token, secret);
+    } catch (err) {
+        return null;
+    }
 }
-
 
 async function authenticateJWT(req, res, next) {
     const authHeader = req.header('Authorization');
@@ -82,8 +59,10 @@ async function authenticateJWT(req, res, next) {
     }
 
     try {
-        const decrypted = await decryptJWT(token);
-        const user = JSON.parse(decrypted.plaintext.toString());
+        const user = decryptJWT(token);
+        if (!user) {
+            return res.status(403).send('Invalid token');
+        }
         req.user = user;
         next();
     } catch (err) {
@@ -175,9 +154,35 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
+
+    // 檢查請求體中是否有必要的字段
+    if (!identifier || !password) {
+        return res.status(400).send('需要用戶名和密碼');
+    }
+
+    // 定義 SQL 查詢，以確認用戶是否存在
     const query = 'SELECT username, password, email, role, creationDate FROM users WHERE username = ? OR email = ?';
+
     try {
-        const token = await encryptJWT({ username: user.username }); // 使用加密函數
+        // 從資料庫獲取用戶資料
+        const [rows] = await db.query(query, [identifier, identifier]);
+        if (rows.length === 0) {
+            return res.status(401).send('用戶名或密碼錯誤');
+        }
+
+        // 取出查詢結果中的用戶資料
+        const user = rows[0];
+
+        // 比較密碼
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).send('用戶名或密碼錯誤');
+        }
+
+        // 生成 JWT
+        const token = encryptJWT({ username: user.username, role: user.role });
+
+        // 返回成功響應和 JWT
         res.status(200).json({
             message: '登入成功！',
             token: token,
@@ -185,13 +190,16 @@ app.post('/login', async (req, res) => {
                 username: user.username,
                 email: user.email,
                 role: user.role,
-                creationDate: user.creationDate,
+                creationDate: user.creationDate
             }
         });
     } catch (err) {
-        res.status(500).send('資料庫查詢錯誤');
+        // 處理可能的錯誤
+        console.error(err);
+        res.status(500).send('伺服器錯誤');
     }
 });
+
 
 app.get('/api/plants', authenticateJWT, async (_, res) => {
     const query = 'SELECT * FROM plants';
@@ -358,10 +366,7 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
 
 
 
-
-const server = https.createServer(options, app);
-
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-  console.log(`Server is running on https://localhost:${port}`);
+const port = process.env.PORT || 3011;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
