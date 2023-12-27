@@ -20,7 +20,10 @@ const DB_USER = process.env.DB_USER;
 const DB_IP = process.env.DB_IP;
 const DB_DATABASE = process.env.DB_DATABASE;
 
-app.use(cors());
+app.use(cors({
+    origin: '*', // 更改為您的前端 URL
+    credentials: true  // 允許發送 Cookie
+}));
 app.use(express.json());
 
 const limiter = rateLimit({

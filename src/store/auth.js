@@ -6,7 +6,7 @@ export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
     registrationSuccess: false,
-
+    token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
     justLoggedIn: false,
     username: null,
@@ -37,6 +37,7 @@ export const useAuthStore = defineStore({
         const response = await axios.post(`${apiUrl}/login`, { identifier, password });
         if (response.status === 200) {
           this.token = response.data.token;
+          localStorage.setItem('token', this.token);
           this.isAuthenticated = true;
           this.username = response.data.user.username;
           this.email = response.data.user.email;
@@ -63,7 +64,7 @@ export const useAuthStore = defineStore({
       if (this.token) {
         try {
           const apiUrl = import.meta.env.VITE_API_URL;
-
+    
           const response = await axios.get(`${apiUrl}/api/currentUser`, {
             headers: {
               'Authorization': `Bearer ${this.token}`
@@ -73,13 +74,14 @@ export const useAuthStore = defineStore({
           this.email = response.data.email;
           this.role = response.data.role;
           this.creationDate = response.data.creationDate;
-          this.avatar = apiUrl + '/' + response.data.avatar; 
+          this.avatar = response.data.avatar ? apiUrl + '/' + response.data.avatar : null;
         } catch (error) {
           console.error('Error fetching current user:', error.response || error);
           this.logout();
         }
       }
     },
+    
 
     hideWelcomeMessage() {
       this.showWelcomeMessage = false;

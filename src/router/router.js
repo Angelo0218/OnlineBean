@@ -78,6 +78,18 @@ import { useAuthStore } from "../store/auth.js";
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
+  // 檢查是否需要重新獲取當前用戶資訊
+  if (authStore.isAuthenticated && !authStore.username) {
+    try {
+      await authStore.fetchCurrentUser(); // 嘗試獲取當前用戶資訊
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      authStore.logout();
+      next({ path: "/login" });
+      return;
+    }
+  }
+
   if (authStore.isAuthenticated) {
     try {
 
