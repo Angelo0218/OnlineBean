@@ -1,7 +1,7 @@
 <template>
     <form @submit.prevent="register">
         <div class="flex items-center justify-center home  mt-32 sm:mt-20    ">
-            <div v-if="errorMessage" class="alert alert-danger fixed-bottom-alert">
+            <div v-if="errorMessage" class="alert alert-danger text-red fixed-bottom-alert">
                 {{ errorMessage }}
             </div>
 
@@ -12,6 +12,19 @@
                             <p class="text-4xl font-black leading-tight tracking-tight text-gray-900">
                                 註冊
                             </p>
+                            <div>
+                                <label for="profilePicture" class="block mb-2 text-sm font-medium text-gray-900">
+                                    大頭貼 (選填)
+                                </label>
+                                <input type="file" id="profilePicture" @change="handleFileChange"
+                                    class="bg-gray-50 border text-gray-900 sm:text-sm rounded-lg block w-full p-2.5">
+                                <div v-if="previewImage" class="mt-2">
+                                    <img :src="previewImage" class="rounded-full w-24 h-24 object-cover">
+                                </div>
+                                <div v-if="fileErrorMessage" class="alert alert-danger fixed-bottom-alert">
+                                    {{ fileErrorMessage }}
+                                </div>
+                            </div>
 
                             <!-- 使用者名稱 -->
                             <div>
@@ -74,36 +87,50 @@ export default {
         const password = ref('');
         const errorMessage = ref('');
         const agreeTerms = ref(false);
+        const previewImage = ref(null);
+        const fileErrorMessage = ref('');
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            const validTypes = ['image/jpeg', 'image/png'];
+
+            if (file && validTypes.includes(file.type)) {
+                previewImage.value = URL.createObjectURL(file);
+            } else if (file) {
+                event.target.value = ''; // 重置文件輸入欄位
+                previewImage.value = null; // 清除現有的預覽
+                fileErrorMessage.value = '只允許上傳 JPG、JPEG、PNG 格式的圖片';
+                setTimeout(() => {
+                    fileErrorMessage.value = '';
+                }, 3000);
+            } else {
+                previewImage.value = null;
+            }
+        }
 
         async function register() {
             if (!agreeTerms.value) {
                 errorMessage.value = '您必須同意使用條例才能註冊';
                 return;
             }
-        }
-        function viewTerms() {
-            router.push('/terms');
-        }
-        async function register() {
-            try {
-                const usernameValue = username.value;
-                const emailValue = email.value;
-                const passwordValue = password.value;
 
-                // 檢查表單是否填寫完整
-                if (!usernameValue || !emailValue || !passwordValue) {
-                    console.error('請填寫所有信息');
-                    return;
+            try {
+                const formData = new FormData();
+                formData.append('username', username.value);
+                formData.append('email', email.value);
+                formData.append('password', password.value);
+
+                const fileInput = document.getElementById('profilePicture');
+                if (fileInput && fileInput.files.length > 0) {
+                    formData.append('avatar', fileInput.files[0]);
                 }
 
-                // 發送註冊請求
                 const apiUrl = import.meta.env.VITE_API_URL;
-                const response = await axios.post(`${apiUrl}/register`, {
-                    username: usernameValue,
-                    email: emailValue,
-                    password: passwordValue,
+                const response = await axios.post(`${apiUrl}/register`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 });
-
 
                 if (response.status === 200) {
                     const authStore = useAuthStore();
@@ -111,17 +138,16 @@ export default {
                     router.push('/login');
                 }
             } catch (error) {
-                errorMessage.value = error.response.data; // 使用伺服器返回的錯誤消息更新 errorMessage
-
-                // 5秒後隱藏錯誤消息
+                errorMessage.value = error.response.data;
                 setTimeout(() => {
                     errorMessage.value = '';
                 }, 2000);
             }
-
         }
 
-
+        function viewTerms() {
+            router.push('/terms');
+        }
 
         return {
             username,
@@ -130,12 +156,14 @@ export default {
             register,
             errorMessage,
             agreeTerms,
-            viewTerms
+            viewTerms,
+            previewImage,
+            fileErrorMessage,
+            handleFileChange
         };
     },
 };
 </script>
-
 
 <style scoped>
 .fixed-bottom-alert {
@@ -163,6 +191,9 @@ video {
     background-color: blackgreen;
 }
 
+.rounded-full {
+    border-radius: 50%;
+}
 
 
 p,
@@ -195,5 +226,9 @@ label {
     margin-top: 1rem;
     display: flex;
     align-items: center;
+}
+
+.alert-danger {
+    color: red;
 }
 </style>

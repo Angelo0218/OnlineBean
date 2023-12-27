@@ -13,8 +13,9 @@
                     <ul v-show="showMobileDropdown" tabindex="0"
                         class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                         <li><router-link to="/" class="menu-item">首頁</router-link></li>
-                        <li><router-link to="/plants" class="menu-item">植物商店</router-link></li>
-                        <li><router-link to="/Backpack" class="menu-item">我的植物</router-link></li>
+                        <li v-if="isAuthenticated"><router-link to="/plants" class="menu-item">植物商店</router-link></li>
+                        <li v-if="isAuthenticated"><router-link to="/Backpack" class="menu-item">我的植物</router-link></li>
+                        <li v-if="isAuthenticated"><router-link to="/forum" class="menu-item">植物社區</router-link></li>
                         <li><router-link to="/about" class="menu-item">關於我們</router-link></li>
                     </ul>
                 </div>
@@ -22,15 +23,16 @@
             <div class="navbar-center max-sm:hidden lg:flex">
                 <ul class="menu menu-horizontal px-1">
                     <li><router-link to="/">首頁</router-link></li>
-                    <li v-if="isAuthenticated"><router-link to="/plants" >植物商店</router-link></li>
-                    <li v-if="isAuthenticated"><router-link to="/Backpack" >我的植物</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/plants">植物商店</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/Backpack">我的植物</router-link></li>
+                    <li v-if="isAuthenticated"><router-link to="/forum">植物社區</router-link></li>
                     <li><router-link to="/about">關於我們</router-link></li>
-                    
+
                 </ul>
             </div>
             <div class="navbar-end mr-2">
                 <div v-if="!isAuthenticated">
-                  
+
                     <router-link to="/register" class="btn btn-ghost ml-2 reg">
                         <i class="fa-solid fa-user-plus"></i> 註冊新帳號
                     </router-link>
@@ -41,6 +43,9 @@
                 <div v-else>
                     <div @click="toggleDropdown" class="relative mr-3">
                         <button class="btn btn-ghost flex items-center">
+                            <img v-if="avatar" :src="avatar" class="w-8 h-8 rounded-full mr-2 hide-on-mobile">
+
+
                             <span>{{ username }}</span>
                             <i class="fa-solid fa-chevron-down ml-2"></i>
                         </button>
@@ -56,7 +61,7 @@
                     </div>
                 </div>
             </div>
-       
+
         </nav>
     </header>
 </template>
@@ -73,12 +78,14 @@ export default {
         const router = useRouter();
         const username = ref(authStore.username);
         const showMobileDropdown = ref(false);
+        const avatar = ref(authStore.avatar);
         const toggleMobileDropdown = () => {
             showMobileDropdown.value = !showMobileDropdown.value;
         };
         watchEffect(() => {
             isAuthenticated.value = authStore.isAuthenticated;
-            username.value = authStore.username;  
+            username.value = authStore.username;
+            avatar.value = authStore.avatar;
         });
 
 
@@ -103,7 +110,8 @@ export default {
             showDropdown,
             toggleDropdown,
             toggleMobileDropdown,
-            showMobileDropdown
+            showMobileDropdown,
+            avatar
         };
     }
 }
@@ -129,6 +137,7 @@ export default {
     transform: translateX(-50%);
     display: none;
 }
+
 .menu-item {
     display: block;
     padding: 6px;
@@ -137,8 +146,10 @@ export default {
     transition: background-color 0.3s ease-in-out;
 }
 
-.menu-item:hover, .menu-item:active {
-    background-color: #e6e6e6; /* 您可以根据需要调整这个颜色 */
+.menu-item:hover,
+.menu-item:active {
+    background-color: #e6e6e6;
+    /* 您可以根据需要调整这个颜色 */
     color: #000;
 }
 
@@ -202,18 +213,27 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(-20px);
     opacity: 0;
-}@media (max-width: 768px) {
-  .btn {
-    font-size: 0.8rem;
-    padding: 8px;
-    margin: 2px;
-  }
-  .navbar-end {
-    flex-wrap: wrap;
-  }
-  .reg{
-    display: none;
-  }
 }
 
+@media (max-width: 768px) {
+    .btn {
+        font-size: 0.8rem;
+        padding: 8px;
+        margin: 2px;
+    }
+
+    .navbar-end {
+        flex-wrap: wrap;
+    }
+
+    .reg {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .hide-on-mobile {
+        display: none;
+    }
+}
 </style>

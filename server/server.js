@@ -6,7 +6,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
-
+import multer from 'multer';
+import sharp from 'sharp';
+import path from 'path';
+import { createCanvas } from 'canvas';
+import { forumRoutes } from './forum.js';
 dotenv.config();
 
 const app = express();
@@ -27,6 +31,8 @@ const limiter = rateLimit({
 
 app.use('/login', limiter);
 app.use('/register', limiter);
+app.use('/uploads', express.static('uploads'));
+
 
 const db = createPool({
     host: DB_IP,
@@ -35,6 +41,9 @@ const db = createPool({
     password: dbPassword,
     database: DB_DATABASE
 });
+
+app.use('/forum', forumRoutes(db, authenticateJWT));
+app.set('trust proxy', 1);
 
 // JWT 加密
 function encryptJWT(payload) {
@@ -128,29 +137,93 @@ app.post('/addPlant', authenticateJWT, authenticateSpecificUser, async (req, res
     }
 });
 
-app.post('/register', async (req, res) => {
-    const { username, password, email } = req.body;
-    const passwordRegex = /^(?=.*[a-z]).{6,}$/;
-    if (!passwordRegex.test(password)) {
-        return res.status(400).send('密碼不符合規定');
-    }
-
-    const checkQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
-    try {
-        const [results] = await db.query(checkQuery, [username, email]);
-        if (results.length > 0) {
-            return res.status(400).send('用戶名或電子郵件已存在');
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const currentDate = new Date().toISOString().slice(0, 10);
-        const query = 'INSERT INTO users (username, password, email, creationDate, role) VALUES (?, ?, ?, ?, ?)';
-        await db.query(query, [username, hashedPassword, email, currentDate, 'regular_user']); // 設定默認角色為 'regular_user'
-        res.status(200).send('註冊成功！');
-    } catch (err) {
-        res.status(500).send('資料庫查詢錯誤');
+// Multer 設置
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
+
+// 檔案過濾器，只允許特定類型的圖片
+const fileFilter = (req, file, cb) => {
+    // 允許的擴展名
+    const filetypes = /jpeg|jpg|png/;
+    // 檢查擴展名
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // 檢查 MIME 類型
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb('錯誤: 只支持圖片(jpeg|jpg|png)');
+    }
+};
+
+const upload = multer({ storage: storage, fileFilter: fileFilter });
+
+
+app.post('/register', upload.single('avatar'), async (req, res) => {
+    const { username, password, email } = req.body;
+
+    // 先檢查數據庫中是否已經存在相同的用戶名或電子郵件
+    try {
+        const existingUserQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
+        const [existingUsers] = await db.query(existingUserQuery, [username, email]);
+        if (existingUsers.length > 0) {
+            return res.status(400).send('用戶名或電子郵件已被使用');
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('數據庫查詢錯誤');
+    }
+
+    // 處理大頭貼
+    let avatarPath;
+    if (!req.file) {
+        // 沒有上傳大頭貼，則生成預設圖片
+        avatarPath = `uploads/${username[0].toUpperCase()}-default.jpg`;
+        createDefaultAvatar(avatarPath, username[0]);
+    } else {
+        // 壓縮上傳的大頭貼
+        const compressedImagePath = 'uploads/compressed-' + req.file.filename;
+        await sharp(req.file.path)
+            .resize(256, 256)
+            .jpeg({ quality: 80 })
+            .toFile(compressedImagePath);
+        avatarPath = compressedImagePath;
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const currentDate = new Date();  // 當前時間
+        const query = 'INSERT INTO users (username, password, email, avatar, creationDate, lastUpdateDate) VALUES (?, ?, ?, ?, ?, NULL)';  // 將 lastUpdateDate 明確設置為 NULL
+        await db.query(query, [username, hashedPassword, email, avatarPath, currentDate]);
+        res.status(200).send('註冊成功！');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('服務器錯誤');
+    }
+});
+
+
+
+function createDefaultAvatar(filePath, text) {
+    const canvas = createCanvas(256, 256);
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#ddd'; // 背景色
+    context.fillRect(0, 0, 256, 256);
+    context.font = 'bold 120px sans-serif';
+    context.fillStyle = '#555'; // 文字顏色
+    context.textAlign = 'center';
+    context.fillText(text.toUpperCase(), 128, 175);
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(filePath, buffer);
+}
 
 app.post('/login', async (req, res) => {
     const { identifier, password } = req.body;
@@ -160,8 +233,8 @@ app.post('/login', async (req, res) => {
         return res.status(400).send('需要用戶名和密碼');
     }
 
-    // 定義 SQL 查詢，以確認用戶是否存在
-    const query = 'SELECT username, password, email, role, creationDate FROM users WHERE username = ? OR email = ?';
+    // 更新 SQL 查詢以包括用戶的大頭貼路徑
+    const query = 'SELECT username, password, email, role, creationDate, avatar FROM users WHERE username = ? OR email = ?';
 
     try {
         // 從資料庫獲取用戶資料
@@ -182,7 +255,7 @@ app.post('/login', async (req, res) => {
         // 生成 JWT
         const token = encryptJWT({ username: user.username, role: user.role });
 
-        // 返回成功響應和 JWT
+        // 返回成功響應、JWT和用戶信息，包括大頭貼路徑
         res.status(200).json({
             message: '登入成功！',
             token: token,
@@ -190,7 +263,8 @@ app.post('/login', async (req, res) => {
                 username: user.username,
                 email: user.email,
                 role: user.role,
-                creationDate: user.creationDate
+                creationDate: user.creationDate,
+                avatar: user.avatar // 大頭貼路徑
             }
         });
     } catch (err) {
@@ -199,6 +273,7 @@ app.post('/login', async (req, res) => {
         res.status(500).send('伺服器錯誤');
     }
 });
+
 
 
 app.get('/api/plants', authenticateJWT, async (_, res) => {
@@ -213,23 +288,30 @@ app.get('/api/plants', authenticateJWT, async (_, res) => {
 
 app.get('/api/currentUser', authenticateJWT, async (req, res) => {
     const username = req.user.username;
-    const query = 'SELECT username, email, role, creationDate FROM users WHERE username = ?'; // 修改了這裡
+    // 更新 SQL 查詢以包括用戶的大頭貼路徑
+    const query = 'SELECT username, email, role, creationDate, avatar FROM users WHERE username = ?';
+
     try {
         const [results] = await db.query(query, [username]);
         if (results.length === 0) {
             return res.status(404).send('用戶未找到');
         }
         const user = results[0];
+
+        // 返回用戶信息和大頭貼路徑
         res.status(200).json({
             username: user.username,
             email: user.email,
-            role: user.role, // 修改了這裡
-            creationDate: user.creationDate
+            role: user.role,
+            creationDate: user.creationDate,
+            avatar: user.avatar // 大頭貼路徑
         });
     } catch (err) {
         res.status(500).send('資料庫查詢錯誤');
     }
 });
+
+
 app.get('/api/userPlants', authenticateJWT, async (req, res) => {
     const username = req.user.username;
 
@@ -259,7 +341,7 @@ app.get('/api/userPlants', authenticateJWT, async (req, res) => {
 app.get('/api/plantDetails', authenticateJWT, async (req, res) => {
     const userId = req.user.userId; // 從JWT獲取用戶ID
     const plantId = req.query.plantId; // 從查詢參數獲取plantId
-    console.log(userId, plantId);
+    // console.log(userId, plantId);
     // 檢查該用戶是否有權訪問該植物
     const checkAuthorizationQuery = 'SELECT * FROM user_plants WHERE user_id = ? AND plant_id = ?';
     try {
@@ -321,46 +403,57 @@ app.get('/api/checkUserPlant/:userPlantId', authenticateJWT, async (req, res) =>
         res.status(500).send('資料庫查詢錯誤: ' + err.message);
     }
 });
+
 app.get('/api/checkTokenValidity', authenticateJWT, (req, res) => {
     // token驗證
     res.status(200).send('Token is valid');
 });
-app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
+
+app.post('/updateUserInfo', authenticateJWT, upload.single('avatar'), async (req, res) => {
     const username = req.user.username;
-    const { newPassword, newUsername, email, password } = req.body;
+    const { newPassword, newUsername, email, currentPassword } = req.body;
+    let newAvatarPath = req.file ? 'uploads/compressed-' + req.file.filename : null;
+
     try {
-        // 首先檢查用戶輸入的當前密碼是否正確
-        const [userResults] = await db.query('SELECT password, lastUpdateDate FROM users WHERE username = ?', [username]);
-        if (userResults.length === 0) {
+        // 從數據庫中獲取當前用戶信息
+        const [currentUser] = await db.query('SELECT password, email, avatar FROM users WHERE username = ?', [username]);
+        if (currentUser.length === 0) {
             return res.status(404).send('用戶未找到');
         }
+        const user = currentUser[0];
 
-        const user = userResults[0];
-        const passwordIsValid = await bcrypt.compare(password, user.password);
-        if (!passwordIsValid) {
+        // 驗證當前密碼
+        if (!currentPassword || !await bcrypt.compare(currentPassword, user.password)) {
             return res.status(401).send('當前密碼錯誤');
         }
 
-        // 檢查距離上次更新是否已過七天
-        const lastUpdateDate = new Date(user.lastUpdateDate);
-        const currentDate = new Date();
-        const diffTime = Math.abs(currentDate - lastUpdateDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // 處理大頭貼更新
+        if (newAvatarPath) {
+            await sharp(req.file.path)
+                .resize(256, 256)
+                .jpeg({ quality: 80 })
+                .toFile(newAvatarPath);
 
-        if (diffDays < 7) {
-            return res.status(403).send('七天內不能重複修改資料');
+            // 刪除舊的大頭貼文件
+            if (user.avatar && fs.existsSync(user.avatar)) {
+                fs.unlinkSync(user.avatar);
+            }
+        } else {
+            newAvatarPath = user.avatar; // 如果沒有新上傳的圖片，使用舊的圖片路徑
         }
 
-        // 更新用戶信息
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await db.query('UPDATE users SET username = ?, password = ?, email = ?, lastUpdateDate = ? WHERE username = ?', [newUsername, hashedPassword, email, currentDate, username]);
-        // 更新用戶信息成功後，生成新的 token
-        const newUser = { username: newUsername || username }; // 新的用戶信息
-        const newToken = jwt.sign(newUser, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // 準備更新用戶信息
+        const hashedPassword = newPassword ? await bcrypt.hash(newPassword, 10) : user.password;
+        const updatedUsername = newUsername || username;
+        const updatedEmail = email || user.email;
+
+        // 更新數據庫
+        await db.query('UPDATE users SET username = ?, password = ?, email = ?, avatar = ? WHERE username = ?', [updatedUsername, hashedPassword, updatedEmail, newAvatarPath, username]);
+
         res.status(200).send('用戶信息更新成功！');
     } catch (err) {
         console.error(err);
-        res.status(500).send('資料庫操作錯誤');
+        res.status(500).send('伺服器錯誤');
     }
 });
 
@@ -368,5 +461,5 @@ app.post('/updateUserInfo', authenticateJWT, async (req, res) => {
 
 const port = process.env.PORT || 3011;
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });

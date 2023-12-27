@@ -77,18 +77,25 @@ export default {
             password: ''
         });
         const handleLogin = async () => {
-            try {
-                const { identifier, password } = credentials.value;
-                await authStore.login(identifier, password); // Here, you might want to check the result, if the login method in the store returns anything
+            const { identifier, password } = credentials.value;
+
+            // 檢查是否所有欄位都已填寫
+            if (!identifier.trim() || !password.trim()) {
+                errorMessage.value = '使用者名稱和密碼不能為空';
+                return; // 早期返回，不進行後續處理
             }
-            catch (error) {
+
+            try {
+                await authStore.login(identifier, password); // 登入邏輯
+                // 登入成功後的邏輯（如果需要）
+            } catch (error) {
                 errorMessage.value = '登錄過程中出現錯誤: ' + error.message;
-                // 5秒後隱藏錯誤消息
                 setTimeout(() => {
                     errorMessage.value = '';
-                }, 2000); // 5000毫秒 = 5秒
+                }, 5000); // 5秒後隱藏錯誤消息
             }
         };
+
         onMounted(() => {
             if (authStore.registrationSuccess) {
                 setTimeout(() => {
@@ -100,7 +107,7 @@ export default {
             credentials,
             handleLogin,
             showRegistrationSuccess: authStore.registrationSuccess,
-            errorMessage 
+            errorMessage
         };
     },
     components: { router }

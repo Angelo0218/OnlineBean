@@ -15,6 +15,12 @@ const routes = [
     component: () => import("../pages/Login/Login.vue"),
   },
   {
+    name: "植物社區",
+    path: "/forum",
+    component: () => import("../pages/forum.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
     name: "關於我們",
     path: "/about",
     component: () => import("../pages/About.vue"),
@@ -47,11 +53,13 @@ const routes = [
     name: "用戶中心",
     path: "/user",
     component: () => import("../pages/User/UserCenter.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "增加",
     path: "/Add",
     component: () => import("../pages/root/Add.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "使用條例",
@@ -72,8 +80,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (authStore.isAuthenticated) {
     try {
-      // ... 其他代码
-      // 检查 justLoggedIn 状态，避免覆盖 showWelcomeMessage
+
       if (!authStore.justLoggedIn) {
         authStore.showWelcomeMessage = !authStore.welcomeMessageShown;
       }
@@ -91,7 +98,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const apiUrl = import.meta.env.VITE_API_URL; // 使用 Vite 環境變量
-  console.log("Username:", authStore.username);
+  // console.log("Username:", authStore.username);
   // 檢查路由是否需要驗證
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // 檢查用戶是否已登錄

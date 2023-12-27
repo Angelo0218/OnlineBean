@@ -25,19 +25,8 @@ axios.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// 如果 localStorage 中有 token，则尝试获取当前用户信息
-const authStore = useAuthStore();
-if (localStorage.getItem('token')) {
-  authStore.fetchCurrentUser().catch(error => {
-    console.error("Error fetching user info:", error);
-    if (error.response && error.response.status === 403) {
-      // 如果错误状态码为 403，清除本地 token 并更新用户认证状态
-      localStorage.removeItem('token');
-      authStore.isAuthenticated = false;
-      authStore.token = null;
-      location.reload();
-    }
-  });
-}
+
+
+
 
 app.use(router).mount('#app');
