@@ -1,5 +1,5 @@
 <template>
-    <main class="px-8 py-7 space-y-4 mt-10">
+    <main class="px-8 py-12 space-y-6 mt-10">
         <h1 class="text-4xl font-bold text-center mb-8">討論區</h1>
         <div class="border text-card-foreground shadow-lg rounded-lg" data-v0-t="card">
             <div class="flex flex-col space-y-1.5 p-6 text-white rounded-t-lg">
@@ -47,11 +47,11 @@
                         <div class="prose mt-4">{{ post.content }}</div>
                     </div>
                     <!-- <button @click="toggleComments(post.id)"
-                        class="inline-flex items-center ml-5 mb-5 justify-center rounded-md text-sm font-medium bg-primary hover:bg-primary/90 h-10 px-4 py-2 text-white">
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary hover:bg-primary/90 h-10 px-4 py-2 text-white">
                         {{ selectedPostId === post.id ? '關閉評論' : '開啟評論' }}
                     </button> -->
                     <!-- 評論部分 -->
-                    <!-- <section v-if="selectedPostId === post.id" class="mt-4 p-5 ">
+                    <section v-if="selectedPostId === post.id" class="mt-4 p-5">
                         <h3 class="text-xl font-bold ">留下評論</h3>
                         <div class="grid gap-4 mt-4">
                             <div class="text-sm flex items-start gap-4">
@@ -63,11 +63,12 @@
                                     發布評論
                                 </button>
                             </div>
-                            <div v-for="comment in comments" :key="comment.id" class="text-sm flex items-start gap-4">
+                            <div v-for="comment in comments[post.id]" :key="comment.id"
+                                class="text-sm flex items-start gap-4">
                                 <p>{{ comment.content }}</p>
                             </div>
                         </div>
-                    </section> -->
+                    </section>
                 </div>
             </div>
         </section>
@@ -133,7 +134,6 @@ export default {
                 try {
                     const response = await axios.get(`${this.apiUrl}/forum/posts/${postId}/comments`);
                     this.$set(this.comments, postId, response.data);
-                    console.log(response.data)
                 } catch (error) {
                     console.error(error);
                 }
